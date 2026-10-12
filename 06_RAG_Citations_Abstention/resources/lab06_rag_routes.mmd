@@ -1,0 +1,24 @@
+%%{init: {"theme": "base", "flowchart": {"nodeSpacing": 30, "rankSpacing": 40, "wrappingWidth": 420, "htmlLabels": true}, "markdownAutoWrap": false, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "clusterBkg": "#F4F5F7", "clusterBorder": "#6B7383"}}}%%
+%% Lab 06: two ways to wire retrieval in, and the checks your code runs on every answer.
+%% Export: npx -y @mermaid-js/mermaid-cli -i lab06_rag_routes.mmd -o lab06_rag_routes.png -b white -s 2
+flowchart TB
+    Q(["rep's question"])
+
+    subgraph TWO["Two-step RAG (Part A)"]
+        S1["your code: search(question, k=3)<br>with the rep's words"] --> M1["model, 1 call:<br>prompt v2 + 3 passages + question"]
+    end
+
+    subgraph AGENT["Agentic RAG (Parts B to D)"]
+        M2["model, call 1:<br>asks for search_policies(query)<br>with its own words"] --> T["your code runs the tool:<br>3 passages as text for the model,<br>files and scores as the artifact"]
+        T --> M3["model, call 2:<br>answers from the passages"]
+    end
+
+    Q --> S1
+    Q --> M2
+    M1 --> A(["answer citing [policy_*.md]"])
+    M3 --> A
+    A --> K["checks in your code<br>cited files were retrieved (Part A)<br>abstains when no policy covers it (Part C)<br>each quote is in its chunk (Part E)"]
+
+    style K fill:#C9F24D,stroke:#0B1220
+    style Q fill:#0B1220,color:#FFFFFF
+    style A fill:#0B1220,color:#FFFFFF
