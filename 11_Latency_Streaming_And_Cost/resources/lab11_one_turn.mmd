@@ -1,0 +1,23 @@
+%%{init: {"theme": "base", "sequence": {"mirrorActors": false, "noteMargin": 10, "width": 190, "actorMargin": 40}, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "noteBkgColor": "#C9F24D", "noteBorderColor": "#0B1220", "noteTextColor": "#0B1220", "actorBkg": "#0B1220", "actorTextColor": "#FFFFFF", "actorBorder": "#0B1220", "signalColor": "#0B1220", "signalTextColor": "#0B1220"}}}%%
+%% Lab 11: one tool-using turn and the three times the lab measures.
+%% Export: npx -y @mermaid-js/mermaid-cli -i lab11_one_turn.mmd -o lab11_one_turn.png -b white -s 2
+sequenceDiagram
+    participant R as Rep's screen
+    participant A as Copilot
+    participant M as Chat model
+    participant T as Tools (Ops API)
+    R->>A: question, clock starts
+    A->>M: model call 1
+    M-->>A: start of a tool call
+    Note over R,A: first chunk: no words yet
+    A->>T: find_customer
+    T-->>A: JSON result
+    A->>M: model call 2
+    M-->>A: tool call
+    A->>T: get_customer_invoices
+    T-->>A: JSON result
+    A->>M: model call 3
+    M-->>R: first words of the reply
+    Note over R,A: first text:<br/>the rep's time<br/>to first token
+    M-->>R: ... last words
+    Note over R,A: total time:<br/>the last word
