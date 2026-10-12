@@ -1,0 +1,19 @@
+%%{init: {"theme": "base", "sequence": {"mirrorActors": false, "messageFontSize": 15, "actorFontSize": 15, "noteFontSize": 15, "wrap": false, "actorMargin": 70, "width": 230, "messageMargin": 40}, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "actorBkg": "#0B1220", "actorTextColor": "#FFFFFF", "actorBorder": "#0B1220", "noteBkgColor": "#C9F24D", "noteBorderColor": "#0B1220", "noteTextColor": "#0B1220", "signalColor": "#0B1220", "signalTextColor": "#0B1220"}}}%%
+%% Lab 07: the five steps of one tool call, and where the rep's identity enters.
+%% Export: npx -y @mermaid-js/mermaid-cli -i lab07_tool_call_path.mmd -o lab07_tool_call_path.png -b white -s 2
+sequenceDiagram
+    participant App as your app
+    participant Agent as agent loop
+    participant Model as model (OpenAI)
+    participant API as Ops API
+
+    App->>Agent: rep's message, context=RepContext(rep_id, rep_name)
+    Agent->>Model: 1 messages + every tool schema
+    Model-->>Agent: 2 tool call: name + JSON arguments
+    Note over App,Agent: 3 check the arguments against the schema<br/>a bad one becomes an error message, no HTTP call
+    Agent->>API: 3 tool body: one HTTP call, 5 s timeout,<br/>rep id from runtime.context
+    API-->>Agent: 200 with JSON, or 404 / 422 with a detail
+    Agent->>Model: 4 tool message with the call id, as text
+    Model-->>Agent: 5 reply, or another tool call
+    Agent-->>App: reply to the rep
+    Note over Model,API: the model sees messages and schemas,<br/>not your code, the API or the context
