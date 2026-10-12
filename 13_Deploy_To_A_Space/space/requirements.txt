@@ -1,0 +1,15 @@
+# The packages app.py and shared/ import, at the versions the lab tested (11 Oct 2026).
+# No gradio line: the Space installs the version in README.md (sdk_version).
+langchain==1.4.3
+langchain-core==1.6.6
+langchain-openai==1.6.7
+langchain-text-splitters==1.1.3
+langgraph==1.2.12
+openai==3.24.0
+faiss-cpu==1.15.1
+numpy==2.5.3
+fastapi==0.141.1
+uvicorn==0.54.0
+httpx==0.28.1
+pydantic==2.13.5
+python-dotenv==1.2.3

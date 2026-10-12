@@ -1,0 +1,31 @@
+%%{init: {"theme": "base", "flowchart": {"curve": "basis", "nodeSpacing": 30, "rankSpacing": 40, "wrappingWidth": 420, "htmlLabels": true}, "markdownAutoWrap": false, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "clusterBkg": "#F4F5F7", "clusterBorder": "#6B7383"}}}%%
+%% Lab 13: one message from a visitor's browser to the copilot and back.
+%% Export: npx -y @mermaid-js/mermaid-cli -i lab13_page_flow.mmd -o lab13_page_flow.png -b white -s 2
+flowchart TB
+    browser["a visitor's browser<br/>message + pasted ticket"]
+    subgraph page["respond(), your Gradio function"]
+        thread["thread_id = the visitor's session (B)"]
+        waiting{"a refund waiting<br/>for approval?"}
+        resume["Approve button or typed reason<br/>→ resume the paused run (D)"]
+        newturn["flag lines, wrap the paste<br/>in &lt;ticket&gt; tags"]
+        steps["stream tool steps, folded (C)"]
+        check["check the reply in code,<br/>then show it (C)"]
+        ask["show the waiting refund<br/>with an Approve button (D)"]
+    end
+    subgraph agent["the guarded copilot from Lab 12"]
+        copilot["moderation · model with retry and fallback<br/>tools · approval before file_refund_request"]
+    end
+    api["Ops API"]
+    key["OPENAI_API_KEY from the environment:<br/>.env locally, a secret on a Space (E, F)"]
+    browser --> thread --> waiting
+    waiting -- yes --> resume --> copilot
+    waiting -- no --> newturn --> copilot
+    copilot <--> api
+    copilot --> steps
+    copilot -- paused --> ask
+    copilot -- finished --> check
+    key -.-> copilot
+    classDef first fill:#C9F24D,stroke:#0B1220,color:#0B1220
+    classDef out fill:#0B1220,stroke:#0B1220,color:#FFFFFF
+    class thread,check first
+    class browser out
