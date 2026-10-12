@@ -110,4 +110,4 @@ app that does not start, the Ops API reused in Part F, the page on Colab, and co
 - [Hugging Face: the `hf` command line](https://huggingface.co/docs/huggingface_hub/en/guides/cli): `hf auth login`, `hf repos create`, `hf upload`, `hf spaces secrets`, `hf spaces logs`
 - [Streamlit: how your app runs](https://docs.streamlit.io/develop/concepts/architecture/run-your-app): the rerun model, `st.session_state` and caching
 
-Next: the capstone, which joins the whole copilot. Back to [the lab list](../README.md).
+Next (optional): [the capstone](../Capstone_Chinook_Copilot/README.md), which joins the whole copilot and evaluates it. Back to [the lab list](../README.md).
