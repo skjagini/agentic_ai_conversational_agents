@@ -3,16 +3,16 @@
 %% Export: npx -y @mermaid-js/mermaid-cli -i lab01_tool_call.mmd -o lab01_tool_call.png -b white -s 2
 sequenceDiagram
     participant Rep as Support rep
-    participant Code as Your code<br>(create_agent)
+    participant Code as Your code<br>(your loop,<br>then create_agent)
     participant Model as Model<br>(OpenAI)
     participant Tool as get_policy
 
     Rep->>Code: question
-    Code->>Model: messages + tool schema
-    Model-->>Code: tool call: name + JSON args
+    Code->>Model: history + tool schema
+    Model-->>Code: function_call: name + JSON arguments
     Note over Code,Model: your code runs the tool, not the model
     Code->>Tool: get_policy(name)
     Tool-->>Code: policy text, or the 20 names
-    Code->>Model: messages + tool result
-    Model-->>Code: reply text, no tool call
+    Code->>Model: history + function_call_output
+    Model-->>Code: reply text, no function_call
     Code-->>Rep: answer: 90 days, new link 7 days
