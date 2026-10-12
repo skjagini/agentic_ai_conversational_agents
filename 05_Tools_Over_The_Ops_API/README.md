@@ -38,7 +38,7 @@ and the three facts checked in code over three more runs.
 **Part D: Pass the rep's identity as context.** A tool that shows a customer's invoices only to the customer's rep:
 first with the rep in the prompt and in an argument, then from `ToolRuntime` context.
 **Part E: Return errors the model can read.** The question about invoice 466 with a tool that raises, then with
-*Not found* returned as data; a malformed argument from a scripted model.
+*Not found* returned as data; the scripted model's code, then a malformed argument from it.
 **Part F: Handle a failing service and cap the calls.** The API stopped, `ToolRetryMiddleware` with your own failure
 message, and `ToolCallLimitMiddleware` on a scripted model that never fixes its call.
 **Going further.** The same tools served over MCP with `langchain.mcp`; a name typed without its accent; whether the
@@ -51,12 +51,12 @@ model follows the "when" in a tool description.
 |---|---|
 | Part A | Helena: customer 6, Czech Republic, Steve Johnson; 7 invoices, 49.62, the first is 46; invoice 466: 404 `No invoice 466`; port 8799: `ConnectError` |
 | Part B | `find_customer` with one string argument `name`; `get_invoice`'s schema with `"exclusiveMinimum": 0`; 0 refused with *Input should be greater than 0* |
-| Part C | `find_customer`, then `get_customer_invoices` with `customer_id` 6; all three facts (4 of 4 runs) |
+| Part C | `find_customer`, then `get_customer_invoices` with `customer_id` 6; all three facts (3 of 3 checked runs) |
 | Part D | `rep_name` as an argument: `Jane Peacock` for a passing claim, `Steve Johnson` when the message asks for it (3 of 3 each); from context with Jane signed in: *Not allowed* every time; Steve signed in: 7 invoices |
 | Part E | the tool that raises: `HTTPStatusError`, no reply; *Not found* as data: the model looks up her invoices and names invoice 46 (3 of 3 runs); scripted: an error tool message, then 46 |
 | Part F | API stopped: `ConnectError`; with `ToolRetryMiddleware`: *failed after 3 attempts with ConnectError*, then your own message; scripted loop: 11 model calls, 4 with `run_limit=3` |
 
-The saved outputs come from `gpt-4o-mini` on 12 Oct 2026 (Python 3.13.5, macOS, a fresh `uv sync`). Parts A and B and
+The saved outputs come from `gpt-4o-mini` on 13 Oct 2026 (Python 3.13.5, macOS, a fresh `uv sync`). Parts A and B and
 the scripted cells give the same values every time. Model runs vary, and differ again if `models.env` names another
 model: compare the tool calls and the facts, not our wording.
 

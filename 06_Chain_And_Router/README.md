@@ -32,14 +32,15 @@ answers the same requests. The tools are imported from `shared/ops_tools.py`, so
 **Part A: Label a request and pull out its arguments.** Get a typed `Request` (a label from a fixed list, the
 customer's name and the invoice numbers) from one `with_structured_output` call, and label the four requests three
 times each.
-**Part B: Write the workflow as plain Python.** Call the tools from your own code, write the account and refund steps,
-write the reply from the fetched facts, and join the branches with `if` and `else`.
+**Part B: Write the workflow as plain Python.** Read `_get`, the function behind the shared tools, call the tools from your own code, write the account and refund steps,
+write the reply from the fetched facts, and join the branches with `if` and `else`: a **router** whose paths are
+short **prompt chains**.
 **Part C: Rebuild the Lab 05 agent.** The same three tools and Lab 05's prompt; follow Puja's question through its
 messages.
-**Part D: Run the same requests through both.** Count calls and tokens with a callback, write a check for each request,
-run every request five times through each shape, and read the failures.
-**Part E: Choose a workflow or an agent.** Read the runs, decide the shape for four support jobs, and decide the
-copilot's.
+**Part D: Run the same requests through both.** Count calls and tokens with a callback, write a check for each request
+(the answer key) and try it on one reply, run every request five times through each shape, and read the failures.
+**Part E: Choose a workflow or an agent.** Read the runs, tell a misroute from a request no route covers, decide the
+shape for four support jobs, and decide the copilot's.
 **Going further.** The same workflow as a LangGraph `StateGraph`.
 **Challenge.** A step for the albums, and a label in front of the agent.
 
@@ -47,14 +48,15 @@ copilot's.
 
 | After | You should see |
 |---|---|
-| Part A | `label='account_lookup' customer_name='Puja Srivastava' invoice_ids=[]`; requests 1, 2 and 4 labelled the same in 3 of 3 runs; the poem `out_of_scope` 2 of 3, once `policy_question` |
+| Part A | `label='account_lookup' customer_name='Puja Srivastava' invoice_ids=[]`; the same label and arguments for all four requests in 3 of 3 runs (an earlier run labelled the poem `policy_question` once) |
 | Part B | Puja: customer 59, 6 invoices, 36.64; ticket 14: a note on two 9.99 charges for the same album on the same date, 2 calls; the poem: the fixed reply, 1 call |
 | Part C | `find_customer`, then `get_customer_invoices` with `customer_id` 59; 6 invoices, 36.64; 3 model calls |
-| Part D | requests 1 and 2: 5 of 5 in both shapes, the workflow at 2 calls and about half the agent's tokens; the poem: workflow 5 of 5, agent 0 of 5; request 4: workflow 0 of 5, agent 5 of 5 at 4 calls and about 2,030 tokens |
+| Part D, one reply | check 1 `True` on the workflow's reply to request 1; `False` on a reply without the total |
+| Part D | requests 1 and 2: 5 of 5 in both shapes, the workflow at 2 calls and about half the agent's tokens; the poem: workflow 5 of 5, agent 0 of 5; request 4: workflow 0 of 5, agent 5 of 5 at 4 calls and about 2,020 tokens |
 | Part E | the four jobs: workflow, workflow, agent, agent, each with its deciding fact |
 | Going further | `classify`, `account_lookup`, `draft`, each adding its own key, 2 calls |
 
-The saved outputs come from `gpt-4o-mini` on 12 Oct 2026 (Python 3.13.5, macOS, a fresh `uv sync`). Model runs vary,
+The saved outputs come from `gpt-4o-mini` on 13 Oct 2026 (Python 3.13.5, macOS, a fresh `uv sync`). Model runs vary,
 and differ again if `models.env` names another model: compare the counts and the kinds of failure, not our wording.
 
 ## Before you start
