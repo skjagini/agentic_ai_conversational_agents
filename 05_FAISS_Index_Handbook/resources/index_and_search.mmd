@@ -1,17 +1,17 @@
 %%{init: {"theme": "base", "flowchart": {"nodeSpacing": 30, "rankSpacing": 40, "wrappingWidth": 420, "htmlLabels": true}, "markdownAutoWrap": false, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "clusterBkg": "#F4F5F7", "clusterBorder": "#6B7383"}}}%%
-%% Lab 05: build the index once, then search it for every question.
-%% Export: npx -y @mermaid-js/mermaid-cli -i lab05_index_and_search.mmd -o lab05_index_and_search.png -b white -s 2
+%% Lab 07: build the index once, then search it for every question.
+%% Export: npx -y @mermaid-js/mermaid-cli -i index_and_search.mmd -o index_and_search.png -b white -s 2
 flowchart TB
-    subgraph ONCE["Once, when the handbook changes (Parts C and D)"]
+    subgraph ONCE["Once, when the handbook changes"]
         direction LR
         H["support_handbook.md<br>20 policies"] --> SP["split by heading<br>20 chunks + source file"]
         SP --> E1["embed each chunk<br>EMBED_MODEL"]
         E1 --> N1["normalise<br>length 1"]
-        N1 --> I[("IndexFlatIP<br>20 vectors")]
-        SP --> J["chunks.json<br>text + source"]
+        N1 --> I[("IndexFlatIP<br>20 vectors, no text")]
+        SP --> J["chunks.json<br>text + source, by row"]
     end
 
-    subgraph EVERY["For every question (Parts E and F)"]
+    subgraph EVERY["For every question"]
         direction LR
         Q(["rep's question"]) --> E2["embed<br>same model"]
         E2 --> N2["normalise"]
