@@ -1,98 +1,98 @@
-# Lab 06: How to answer from documents with citations
+# Lab 08: How to give an agent a document search tool
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tatwan/agentic_ai_conversational_agents/blob/main/06_RAG_Citations_Abstention/06_rag_citations_abstention.ipynb)
 
-**CPU | API key: `OPENAI_API_KEY` | Follows: Day 1 D1-M08, steps 8.1 to 8.7 (D1-M08-01 to D1-M08-49, slides 251–296)**
+**CPU | API key: `OPENAI_API_KEY` | In class**
 
 ## Goal
 
-The copilot can search the support handbook, but search alone answers nothing: it returns the three nearest
-passages, even for a question no policy covers. In this lab you connect the search to the chat model so that the
-copilot answers from the passages, names the file each rule came from and says so when the handbook is silent, and
-you check every answer in code. The moment that teaches it: asked whether Chinook matches a lower price, which no
-policy covers, the copilot (`gpt-4o-mini`, in every one of our runs) invents *we do not match lower prices*, cites a
-real file it retrieved, and passes the citation check. A citation shows where the model looked, not that the source says it; a quote for each claim,
-checked in code, closes that gap.
+Give an agent a tool that searches the support handbook, so that it answers rule questions from the handbook, names
+the file each rule came from, and says so when the handbook has no answer. The moment that teaches it: asked for a
+warmer greeting, the agent does not search; asked about a duplicate charge, it searches and cites
+`policy_refunds.md`; asked whether Chinook matches a lower price, which no policy covers, it searches, finds nothing
+that answers, and says the handbook does not cover it (5 of 5 runs for each question on `gpt-4o-mini`).
 
 ## What you will learn
 
-- How to answer from retrieved passages two ways: retrieve in your own code (two-step RAG) or give the model a
-  retriever tool (agentic RAG), and what each costs in model calls.
-- How to build a retriever tool that also returns its hits as data (`response_format="content_and_artifact"`), so
-  your code knows exactly which files the model was given.
-- How to check a cited answer in code: every cited file was retrieved, the reply abstains when no policy covers the
-  question, and no phone number was made up.
-- How to test abstention with a question no policy covers, and how to notice when the agent skipped its search.
-- Why a real citation does not prove a claim, and how to make each claim carry a quote that your code can check.
-- When sending the whole handbook beats retrieval, measured in tokens on the same questions.
+- How to load the handbook into a vector store, with each section's file and title as metadata.
+- How to answer from the handbook in two steps by hand: search in your code, then one model call with the passages.
+- How to give an agent the same search as a tool, and see when it decides to call it.
+- How to make the agent cite its sources and say when the handbook has no answer.
+- How to check citations and abstention in code, from the files the tool returned.
+- How to catch a citation that does not support its claim, with a quote your code looks up.
 
 ## Coming from
 
-[Lab 05](../05_FAISS_Index_Handbook/README.md) builds a FAISS index of the support handbook's 20 policies step by
-step, and shows that the search returns three chunks even when none answers. This lab loads the same index prebuilt
-in `data/index/` with the functions Lab 05 wrote, kept in `shared/copilot.py`, and its first section recalls in two
-paragraphs what an embedding and a vector index are, so you can also start here. Lab 01's agent and Lab 03's `wrap_model_call` (used
-in the Challenge) are the other pieces it reuses.
+Lab 01 gave the copilot `get_policy`, which needs the policy's name. This lab gives it a search that finds the policy
+from the rep's own words, built in the notebook with LangChain's `InMemoryVectorStore`. The self-study Lab 07 shows
+how that kind of search works inside (FAISS, scores, chunking); this lab does not need it. You reuse `create_agent`
+and tools from Lab 01.
 
 ## What you will do
 
-**Part A: Two-step RAG.** Load the index, retrieve the top 3 for the duplicate-charge question, send prompt v2, the
-passages and the question in one call, and check that every cited file was retrieved.
-**Part B: A retriever tool.** Write `search_policies`, build the agent with it, print the messages and
-count the model calls. Then give the tool `response_format="content_and_artifact"` so it returns the files and scores
-as data, and read them from the tool message.
-**Part C: A question no policy covers.** Search the corpus for a price-matching rule, print the top 3 for a short
-query and a longer one, then ask the agent three times and check each reply for abstention and citations.
-**Part D: Ask for the manager's number.** Ask three times, check each reply, find the prompt example the agent copied, and
-read a reference reply's cited sentences against their chunks.
-**Part E: Check each claim against its chunk.** Mark three cited answers (and the bonus), see that a
-file check passes all three, then ask for a `CitedAnswer` (`covered`, claims with quotes) and check every quote in
-code.
-**Part F: RAG or the whole handbook.** Send the whole handbook with each question, compare input tokens, cached
-tokens and replies with two-step RAG, and choose a route for the copilot.
-**Challenge.** Try a score threshold for abstention, make the agent search first with middleware, and add an
-abstention example to the prompt.
+**Part A: Load the handbook into a vector store.** Split the handbook at its headings, keep each section's file and
+title as metadata, and embed the 20 sections into `InMemoryVectorStore`.
+**Part B: Search, then answer in two steps.** A plain `search` function, a shorter query that pushes the right
+section down to fourth, and one model call with the passages.
+**Part C: Give the agent the search as a tool.** `search_policies` returns the passages for the model and the files
+and scores as an artifact for your code; the agent searches for the duplicate charge and not for the greeting.
+**Part D: Cite the file each rule came from.** One prompt line adds citations; on the price question the agent
+invents a rule and cites a real file.
+**Part E: Say when the handbook has no answer.** One more prompt line; five runs of each question.
+**Part F: Check citations and abstention in code.** Cited files against retrieved files, an abstention check, and
+the invented rule that passes the citation check.
+**Part G: Catch a citation that does not support its claim.** A quote for every claim, looked up in its passage, with
+the agent filling a `CitedAnswer`.
+**Going further.** The whole handbook in the prompt with cached tokens counted; the same search on Qdrant.
+**Challenge.** A score threshold, a search limited to some sections, and new test questions.
 
 ## Checkpoints
 
 | After | You should see |
 |---|---|
-| Part A | 20 chunks of 1,536 numbers; top 3 `policy_refunds.md` 0.4595, `policy_damaged_media.md` 0.4195, `policy_digital_downloads.md` 0.3855; the reply gives the duplicate-charge rule and cites `[policy_refunds.md]`; 734 input tokens; every cited file retrieved |
-| Part B | one `search_policies` call with the model's own query (ours: *charged twice for the same album*, refunds third at 0.3227); the reply cites `[policy_refunds.md]`; 2 model calls (1,338 input tokens); the artifact lists three files with scores |
-| Part C | the corpus has no price-matching rule; the short query: exchanges 0.3252, student discount 0.3118, payment 0.2955; the longer query: exchanges 0.3108, refunds 0.2976, student discount 0.2840; the correct reply abstains and cites nothing. Ours abstained in 0 of 3 runs (*we do not match lower prices*, citing `policy_exchanges.md` twice and `policy_payment.md` once), and the citation check passed all three |
-| Part D | the correct reply refuses, cites `[policy_escalations.md]`, has no digits. Ours: no search in 3 of 3, one model call, the prompt's example copied, citation check `False`, two replies mention email with no citation; in the reference reply, *Support is by email* cites `policy_support_hours.md`, which never says email |
-| Part E | the three answers: 1 supported, 2 and 3 unsupported; a file check passes all three; a made-up quote fails the quote check; the structured answer abstains on price matching (`covered: False`, no claims) and every quote is found for the other two questions |
-| Part F | 1,185 words; whole handbook about 2,038 input tokens a question against 734; cached tokens in one of our six calls (1,792); both price-match replies cite `policy_refunds.md`, one abstains and one still tells the customer *we don't match lower prices* |
+| Part A | 20 sections; metadata `{'source': 'policy_refunds.md', 'section': 'Refunds'}`; 20 documents in the store |
+| Part B | top 4: `policy_refunds.md` 0.4807, `policy_damaged_media.md` 0.4515, `policy_exchanges.md` 0.4123, `policy_digital_downloads.md` 0.3906; the short query puts refunds fourth (0.3391); the reply gives the duplicate-charge rule |
+| Part C | the artifact lists four files with scores; one search for the duplicate charge, none for the greeting |
+| Part D | the duplicate charge cites `[policy_refunds.md]`; the price question gets an invented rule citing `[policy_exchanges.md]` |
+| Part E | greeting: no search, 5 of 5; duplicate charge: the rule with its citation, 5 of 5; price match: *the handbook does not cover it*, no citation, 5 of 5 |
+| Part F | every run passes its checks; Part D's invented rule passes `cited files retrieved` and fails only `abstained` |
+| Part G | the invented rule's quote is not found; the duplicate charge's quote is found 3 of 3; the greeting names a file that does not exist (flagged 3 of 3); ours set `covered False` on price matching in 1 of 3 runs |
+| Going further | whole handbook about 1,698 input tokens a question, 1,536 cached in 5 of 6 calls; the search tool about 548; Qdrant returns the same four files and scores |
 
-Values come from a run on 11 Oct 2026 (`gpt-4o-mini`, `text-embedding-3-small`, Python 3.13.5, macOS, a fresh
-`uv sync`). Search scores are stable to about four decimals; replies change from run to run, so check the files, the
-order and the facts, not our wording. Each planned failure was run several times while building the lab; the
-notebook gives the counts. A reference run with `gpt-6-luna` (5 Oct 2026) abstained on price matching and
-searched before refusing the manager's number: compare with it if `models.env` names that model.
+The saved outputs come from `gpt-4o-mini` and `text-embedding-3-small` on 12 Oct 2026 (langchain 1.4.3, Python
+3.13.5, macOS, a fresh `uv sync`). Search scores can move in the fourth decimal; replies change from run to run, so
+check the files, the searches and the checks, not our wording. If `models.env` names another model, your counts may
+differ: the checks in Part F tell you how.
 
 ## Before you start
 
-- **Lab 00 first.** Its Part E proves that your key reaches the chat model. Lab 01 explains the agent.
+- **Lab 00 first.** It checks that your key reaches the chat model. Lab 01 explains tools and the agent.
 - **Colab:** use the badge above. Add your OpenAI key under Secrets (the key icon in the left bar) as
   `OPENAI_API_KEY` and switch on notebook access. Run the setup cell first in a fresh session.
 - **Local:** in the repository folder, `uv sync`, then put `OPENAI_API_KEY` in `.env` (copied from `.env.example`).
   Open the notebook in JupyterLab (`uv run jupyter lab`) or VS Code and choose the `.venv` kernel.
-- **Data:** the index in `data/index/`, the policy and ticket files in `data/corpus/`, the handbook in
-  `data/handbook/` and prompt v2 in `shared/prompts/copilot_system_v2.md`, all read in place.
-- **Cost:** about 22 `gpt-4o-mini` calls and 12 embedding calls: well under one US cent.
+- **Data:** the handbook in `data/handbook/support_handbook.md`, read in place. The store lives in memory and is built
+  again each time you run the notebook.
+- **Going further** installs `langchain-qdrant` 1.1.0 if it is missing; the rest of the lab needs nothing beyond the
+  repository's requirements.
+- **Cost:** about 55 `gpt-4o-mini` calls and 40 embedding calls: under one US cent.
 
-The notebook ends with a troubleshooting table for the usual failures: a missing index file, a query embedded with a
-different model, a tool that returns no artifact, an agent that does not search, a citation or abstention the
-regular expressions miss, a missing key.
+The copilot's later labs import the same search from `shared/copilot.py` (`search_policies`), built on
+`InMemoryVectorStore` from the 20 policy files.
+
+The notebook ends with a troubleshooting table: a tool that returns only text, a missing `langchain_qdrant`, a missing
+key.
 
 ## Resources
 
-- [LangChain: retrieval](https://docs.langchain.com/oss/python/langchain/retrieval): two-step, agentic and hybrid RAG compared
+- [LangChain: retrieval](https://docs.langchain.com/oss/python/deepagents/retrieval): two-step, agentic and hybrid RAG compared
+- [LangChain: semantic search](https://docs.langchain.com/oss/python/langchain/knowledge-base): documents, embeddings and `InMemoryVectorStore`
+- [LangChain: vector stores](https://docs.langchain.com/oss/python/integrations/vectorstores): the common interface, Qdrant, Chroma and others
 - [LangChain: messages](https://docs.langchain.com/oss/python/langchain/messages): the tool message and its `artifact`
-- [LangChain reference: `BaseTool.response_format`](https://reference.langchain.com/python/langchain-core/tools/base/BaseTool/response_format): `"content"` or `"content_and_artifact"`
-- [LangChain models: structured output](https://docs.langchain.com/oss/python/langchain/models#structured-output): `with_structured_output` with a Pydantic schema
-- [Anthropic: reduce hallucinations](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations): allow "I don't know", ground answers in quotes, verify each claim with a quote
-- [Anthropic: contextual retrieval](https://www.anthropic.com/news/contextual-retrieval): upgrades to retrieval (contextual embeddings, BM25, reranking), and when to send the whole knowledge base instead
-- [OpenAI: prompt caching](https://developers.openai.com/api/docs/guides/prompt-caching): when a long, repeated prompt is cached
+- [LangChain: structured output](https://docs.langchain.com/oss/python/langchain/structured-output): `response_format` on `create_agent`
+- [Anthropic: reduce hallucinations](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations): allow "I don't know", ground answers in quotes
+- [Anthropic: contextual retrieval](https://www.anthropic.com/engineering/contextual-retrieval): better retrieval, and when to send the whole knowledge base instead
+- [OpenAI: prompt caching](https://developers.openai.com/api/docs/guides/prompt-caching): when a long, repeated prompt is cached, and `prompt_cache_key`
 
-Next: [Lab 07: How to turn an API into tools an agent can call](../07_Tools_Over_The_Ops_API/README.md). Back to [the lab list](../README.md).
+Next: [Lab 09: How to ask a person before an agent acts](../08_Approval_Before_A_Write/README.md). Back to [the lab
+list](../README.md).
