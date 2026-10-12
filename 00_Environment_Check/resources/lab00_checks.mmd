@@ -5,18 +5,18 @@ flowchart LR
     NB["00_environment_check.ipynb"]
     REQ["requirements.txt<br>20 pinned packages"]
     SUMS["data/SHA256SUMS.txt<br>41 files"]
-    DB["data/chinook.db<br>opened read-only"]
+    DB["data/chinook.db<br>and the other data files"]
     API["shared/ops_api.py<br>Ops API, 127.0.0.1:8765"]
     ENV["models.env<br>CHAT_MODEL"]
     OAI["OpenAI Responses API"]
 
     NB -- "A versions" --> REQ
     NB -- "B hashes" --> SUMS
-    NB -- "B one count" --> DB
-    NB -- "C HTTP" --> API
+    SUMS -- "lists" --> DB
+    NB -- "C /health" --> API
     API -- "reads" --> DB
-    NB -- "D SDK, E LangChain" --> OAI
-    ENV -- "F names the model" --> OAI
+    NB -- "D one call" --> OAI
+    ENV -- "E names the model" --> OAI
 
     classDef ink fill:#0B1220,stroke:#0B1220,color:#FFFFFF
     classDef indigo fill:#D9DDFA,stroke:#3B4AE0,color:#0B1220
