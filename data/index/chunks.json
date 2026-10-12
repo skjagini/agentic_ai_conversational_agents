@@ -1,0 +1,102 @@
+[
+ {
+  "text": "## Accounts\nSource: policy_accounts.md  \nAn account is the email plus the customer record. One email, one account.  \nA customer can change their email once per calendar year. Invoices already issued keep the old email as a snapshot.  \nAccount deletion: we remove the login and the marketing flag. Invoices stay. Support tickets stay for 24 months, then they are dropped. See policy_data_retention.md.",
+  "source": "policy_accounts.md",
+  "policy": "Accounts"
+ },
+ {
+  "text": "## Cancellations\nSource: policy_cancellations.md  \nA physical order can be cancelled until it ships. After it ships, use the return policy.  \nA digital order can be cancelled only before the download starts. After the first byte, it is a completed digital sale.  \nTo cancel, write to support with the invoice number the same day if you can.",
+  "source": "policy_cancellations.md",
+  "policy": "Cancellations"
+ },
+ {
+  "text": "## Damaged media\nSource: policy_damaged_media.md  \nIf a CD or vinyl arrives cracked, warped, or will not play, we replace it at no charge. Photograph the damage. Keep the original copy until the replacement arrives, then recycle it.  \nIf the same title arrives damaged twice, offer a refund instead of a third copy.",
+  "source": "policy_damaged_media.md",
+  "policy": "Damaged media"
+ },
+ {
+  "text": "## Data retention\nSource: policy_data_retention.md  \nInvoices: kept for 7 years (tax).  \nSupport tickets: 24 months, then deleted.  \nDownload logs: 12 months.  \nMarketing flags: until the customer opts out or the account is deleted.  \nWe do not keep call recordings. This shop's support is email only.",
+  "source": "policy_data_retention.md",
+  "policy": "Data retention"
+ },
+ {
+  "text": "## Digital downloads\nSource: policy_digital_downloads.md  \nA digital album is available for download for 90 days after purchase. After that the link expires. The customer can request one new link; it lasts 7 days.  \nDownloads are tied to the customer email on the invoice. We do not send a second copy to a different email.  \nThere is no return and no refund on a completed download unless the file is corrupt. Then we re-issue the link.",
+  "source": "policy_digital_downloads.md",
+  "policy": "Digital downloads"
+ },
+ {
+  "text": "## Escalations\nSource: policy_escalations.md  \nEscalate when:  \n- a refund over 100 dollars is requested\n- the same customer has three open tickets\n- a representative wants to override a written policy  \nEscalations go to the support manager. The assigned representative stays on the ticket.  \nThis shop does not publish the manager's personal phone number. Do not invent one.",
+  "source": "policy_escalations.md",
+  "policy": "Escalations"
+ },
+ {
+  "text": "## Exchanges\nSource: policy_exchanges.md  \nAn exchange is a return plus a new order. The customer pays any price difference. If the new item is cheaper, we refund the difference.  \nExchanges use the same 30-day unopened window as returns.  \nWe do not exchange a digital album for a vinyl pressing of the same title without a new paid order.",
+  "source": "policy_exchanges.md",
+  "policy": "Exchanges"
+ },
+ {
+  "text": "## Gift cards\nSource: policy_gift_cards.md  \nGift cards are sold in 15, 25, and 50 dollar amounts. They do not expire.  \nA gift card cannot be exchanged for cash except where the law requires it.  \nLost gift-card codes are not replaced. The purchaser should treat the code like cash.",
+  "source": "policy_gift_cards.md",
+  "policy": "Gift cards"
+ },
+ {
+  "text": "## International orders\nSource: policy_international.md  \nWe ship physical goods to the country on the invoice. We do not redirect a parcel in transit.  \nVAT or sales tax is calculated at checkout for the billing country. We do not add a second tax after the invoice is issued.  \nSome titles are licensed for one region only. Those cannot be shipped outside that region. The product page says so before purchase.",
+  "source": "policy_international.md",
+  "policy": "International orders"
+ },
+ {
+  "text": "## Library and playlists\nSource: policy_library.md  \nPurchased digital tracks appear in the customer's library within 15 minutes of a successful payment.  \nPlaylists are stored on the account. Deleting the account deletes playlists. Invoices remain.  \nWe do not move a library from one account to another. That is a new purchase.",
+  "source": "policy_library.md",
+  "policy": "Library and playlists"
+ },
+ {
+  "text": "## Payment\nSource: policy_payment.md  \nWe accept cards and shop gift cards. We do not accept cash by post or cryptocurrency.  \nA failed payment cancels the order. The customer must place it again.  \nSplit tender (card plus gift card) is allowed. The gift card is applied first.",
+  "source": "policy_payment.md",
+  "policy": "Payment"
+ },
+ {
+  "text": "## Preorders\nSource: policy_preorders.md  \nA preorder can be cancelled until the street date. After the street date it is a normal order.  \nWe do not charge the card until the item ships.  \nIf a preorder is delayed more than 30 days past the advertised street date, the customer may cancel for a full refund.",
+  "source": "policy_preorders.md",
+  "policy": "Preorders"
+ },
+ {
+  "text": "## Privacy\nSource: policy_privacy.md  \nWe store name, billing address, email, and invoice history. We do not store full card numbers after the payment clears.  \nWe do not sell customer lists.  \nA customer may ask for a copy of their stored data, or ask us to delete the account. Deletion keeps invoices for tax. See policy_accounts.md and policy_data_retention.md.",
+  "source": "policy_privacy.md",
+  "policy": "Privacy"
+ },
+ {
+  "text": "## Refunds\nSource: policy_refunds.md  \nRefunds go back to the original payment method. They take 5 to 10 business days after support approves the request.  \nPartial refunds are allowed when only some tracks on a multi-disc set are defective.  \nWe do not refund because a customer changed their mind about a digital purchase.  \nDuplicate charges: if two invoices exist for the same album on the same day, refund the later invoice in full. Attach both invoice numbers.",
+  "source": "policy_refunds.md",
+  "policy": "Refunds"
+ },
+ {
+  "text": "## Returns\nSource: policy_returns.md  \nPhysical items (CDs, vinyl, boxed sets) may be returned within 30 days of the invoice date if unopened.  \nOpened physical media can be returned within 14 days only if the disc is defective. A replacement is preferred over a refund.  \nDigital downloads and streamed albums cannot be returned. See policy_digital_downloads.md.  \nStart a return by writing to support. Include the invoice number. Support will reply within the SLA in policy_support_hours.md.",
+  "source": "policy_returns.md",
+  "policy": "Returns"
+ },
+ {
+  "text": "## Shipping\nSource: policy_shipping.md  \nDomestic (same country as the billing address): 3 to 7 business days.  \nInternational: 10 to 21 business days. Customs fees are the customer's.  \nWe ship physical orders once. We do not split a single invoice across two parcels.  \nFree shipping on physical orders over 50 dollars before tax.",
+  "source": "policy_shipping.md",
+  "policy": "Shipping"
+ },
+ {
+  "text": "## Student discount\nSource: policy_student_discount.md  \nA verified student email (ending in .edu or the local equivalent) gets 10 percent off physical items. Digital albums are not discounted.  \nThe discount is applied at checkout. We do not add it after the invoice exists.  \nThe discount cannot be stacked with gift-card promotions.",
+  "source": "policy_student_discount.md",
+  "policy": "Student discount"
+ },
+ {
+  "text": "## Support hours and SLA\nSource: policy_support_hours.md  \nSupport is staffed Monday to Friday, 09:00 to 17:00 in the shop's local time. Closed public holidays.  \nFirst reply: within 1 business day.  \nRefund or replacement decision: within 3 business days of the first reply.  \nUrgent: damaged media that will not play, or a failed digital download. Those jump the queue.",
+  "source": "policy_support_hours.md",
+  "policy": "Support hours and SLA"
+ },
+ {
+  "text": "## Support representatives\nSource: policy_support_reps.md  \nEach customer is assigned one support representative. The assignment lives on the customer record. It does not change when a ticket is opened.  \nKnown representatives in this shop:  \n- Steve Johnson\n- Jane Peacock\n- Margaret Park\n- Nancy Edwards  \nA ticket is always answered by the assigned representative when they are in. If they are out, any on-duty representative may reply, then hand it back.",
+  "source": "policy_support_reps.md",
+  "policy": "Support representatives"
+ },
+ {
+  "text": "## Warranty on physical media\nSource: policy_warranty.md  \nManufacturing defects are covered for 90 days from the invoice date. This is separate from the return window.  \nWear from ordinary play (scratches, a warped sleeve from sunlight) is not a defect.  \nWe do not warranty third-party players, needles, or headphones sold as add-ons after 30 days.",
+  "source": "policy_warranty.md",
+  "policy": "Warranty on physical media"
+ }
+]
