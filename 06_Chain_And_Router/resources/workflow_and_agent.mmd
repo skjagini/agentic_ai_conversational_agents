@@ -1,0 +1,21 @@
+%%{init: {"theme": "base", "flowchart": {"curve": "basis", "nodeSpacing": 30, "rankSpacing": 40}, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "clusterBkg": "#F4F5F7", "clusterBorder": "#6B7383"}}}%%
+%% Who decides the next step: a workflow (your code, after one label) and an agent (the model, at every step).
+%% Export: npx -y @mermaid-js/mermaid-cli -i workflow_and_agent.mmd -o workflow_and_agent.png -b white -s 2
+flowchart TB
+    subgraph WORKFLOW["workflow: the model gives a label, your code runs the steps"]
+        direction LR
+        w0[label and<br/>arguments<br/>model] -->|account_lookup| w1[find_customer<br/>get_customer_invoices<br/>code] --> w3[draft<br/>model]
+        w0 -->|refund_request| w2[get_invoice<br/>per number<br/>code] --> w3
+        w0 -->|policy_question<br/>out_of_scope| w4[fixed reply<br/>code]
+    end
+    subgraph AGENT["agent: the model picks every next step"]
+        direction LR
+        a0[model] -->|tool call| a1[any of the<br/>3 tools]
+        a1 -->|result| a0
+        a0 -->|no tool call| a2[reply]
+    end
+    WORKFLOW ~~~ AGENT
+    classDef model fill:#0B1220,color:#FFFFFF,stroke:#0B1220
+    classDef code fill:#C9F24D,color:#0B1220,stroke:#0B1220
+    class w0,w3,a0 model
+    class w1,w2,w4,a1 code
