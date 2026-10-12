@@ -37,8 +37,9 @@ the `function_call` the model sends back instead of text.
 `function_call_output`, then write the loop that runs until a reply has no function call.
 **Part E: Ask a question that needs no tool.** Join the pieces in one function and ask a policy question and a
 wording request with the same tool: the model decides which needs it.
-**Part F: Build the same agent with LangChain.** Wrap `get_policy` with `tool`, print its schema beside yours, run
-`create_agent`, and list what LangChain now does for you and what is still yours.
+**Part F: Build the same agent with LangChain.** Wrap `get_policy` with `tool`, print its schema beside yours, build
+the model with `ChatOpenAI` and read the `chat_model` helper later labs use, run `create_agent` and display its graph,
+and list what LangChain now does for you and what is still yours.
 **Challenge.** Put the policy names in the tool's description, cap the agent loop with a call limit, and check which
 policy an answer really came from.
 
@@ -51,7 +52,7 @@ policy an answer really came from.
 | Part C | `output_text` empty and one `function_call` for `get_policy` with a JSON string of arguments |
 | Part D | the answer gives 90 days after purchase and one new link that lasts 7 days, after 2 model calls, or 3 when the first policy name is wrong |
 | Part E | the download question reads `digital_downloads` (after a wrong name, in our run); the wording request reads no policy |
-| Part F | the same name, description and argument in both schemas; the agent's messages map onto your loop; the wording request gives 2 messages |
+| Part F | the same name, description and argument in both schemas; `chat_model`'s source builds the same `ChatOpenAI`; a `CompiledStateGraph` whose `model` and `tools` nodes are your loop; the agent's messages map onto your loop; the wording request gives 2 messages |
 
 The saved outputs come from `gpt-4o-mini` on 12 Oct 2026. Replies and counts change from run to run, and from model
 to model if `models.env` names another one: check the facts (90 days, 7 days) and the shape of the run, not the
@@ -69,7 +70,7 @@ wording.
 
 The notebook ends with a troubleshooting table for the usual failures: a function call sent back without its output
 (or the other way round), a strict schema without `additionalProperties`, arguments used without `json.loads`, a
-docstring the tool wrapper cannot read, a missing key.
+docstring the tool wrapper cannot read, a graph that will not draw offline, a missing key.
 
 ## Resources
 
