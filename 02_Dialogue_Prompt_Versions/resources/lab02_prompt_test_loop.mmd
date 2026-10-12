@@ -2,11 +2,12 @@
 %% Lab 02: how a prompt change is tested.
 %% Export: npx -y @mermaid-js/mermaid-cli -i lab02_prompt_test_loop.mmd -o lab02_prompt_test_loop.png -b white -s 2
 flowchart LR
-    P["prompt file<br/>shared/prompts/<br/>copilot_system_v1.md"] --> A["agent<br/>prompt + get_policy"]
-    Q["six fixed<br/>rep questions,<br/>written first"] --> A
-    A -->|"3 runs per question"| R["replies and<br/>tool calls"]
-    R --> C["checks in code<br/>right policy<br/>under 80 words<br/>names the policy<br/>key fact"]
-    C --> T["pass table<br/>one row per question"]
+    Q["six rep<br/>questions"] --> A["agent<br/>prompt version<br/>+ get_policy"]
+    P["prompt file<br/>prompts/copilot_v1.md"] --> A
+    A -->|"3 runs per question"| R["reply and<br/>policies fetched"]
+    R --> C["two checks in code<br/>right_policy<br/>has_fact"]
+    K["answer key<br/>written first,<br/>never sent to<br/>the model"] --> C
+    C --> T["table<br/>one row per question"]
     T -->|"change one thing,<br/>save a new version"| P
     classDef lime fill:#C9F24D,stroke:#0B1220,color:#0B1220
     class T lime
