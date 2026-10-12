@@ -1,0 +1,30 @@
+%%{init: {"theme": "base", "flowchart": {"curve": "basis", "nodeSpacing": 30, "rankSpacing": 50, "wrappingWidth": 420, "htmlLabels": true}, "markdownAutoWrap": false, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "clusterBkg": "#F4F5F7", "clusterBorder": "#6B7383"}}}%%
+%% Lab 10: one case run through the copilot, read from what it did, scored three ways.
+%% Export: npx -y @mermaid-js/mermaid-cli -i lab10_evaluation_loop.mmd -o lab10_evaluation_loop.png -b white -s 2
+flowchart LR
+    case["case (a dict)<br/>input · want<br/>calls · never · reply text"]
+    subgraph run["run_case"]
+        copilot["copilot<br/>tools · approval pause"]
+        trace["messages<br/>tool calls and arguments<br/>tool results · reply"]
+        pause["waiting write<br/>rejected"]
+        rows["Ops API table<br/>rows before and after"]
+    end
+    label["your label<br/>written first"]
+    check["check<br/>plain function<br/>over the messages"]
+    judge["judge<br/>reply against<br/>tool results"]
+    table["one row per case<br/>check · judge · label<br/>tokens · seconds"]
+    case --> copilot
+    copilot --> trace
+    copilot --> pause
+    pause --> rows
+    trace --> label
+    trace --> check
+    rows --> check
+    trace --> judge
+    label --> table
+    check --> table
+    judge --> table
+    classDef first fill:#C9F24D,stroke:#0B1220,color:#0B1220
+    classDef out fill:#0B1220,stroke:#0B1220,color:#FFFFFF
+    class label first
+    class table out
