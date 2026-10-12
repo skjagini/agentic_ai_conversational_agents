@@ -1,16 +1,16 @@
 %%{init: {"theme": "base", "sequence": {"mirrorActors": false, "messageFontSize": 15, "actorFontSize": 15, "noteFontSize": 15, "wrap": false, "actorMargin": 80, "width": 190, "messageMargin": 40}, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "actorBkg": "#0B1220", "actorTextColor": "#FFFFFF", "actorBorder": "#0B1220", "noteBkgColor": "#C9F24D", "noteBorderColor": "#0B1220", "noteTextColor": "#0B1220", "signalColor": "#0B1220", "signalTextColor": "#0B1220"}}}%%
-%% Lab 03: one turn on a thread. The checkpointer loads and saves the thread; a hook decides what the model is sent.
+%% Lab 03: one turn on a thread. The checkpointer loads and saves the thread; middleware changes the messages in between.
 %% Export: npx -y @mermaid-js/mermaid-cli -i lab03_thread_turn.mmd -o lab03_thread_turn.png -b white -s 2
 sequenceDiagram
     participant Rep as Support rep
     participant Code as Your code<br>(create_agent)
-    participant Saver as Checkpointer
+    participant Saver as Checkpointer<br>(threads.sqlite)
     participant Model as Model<br>(OpenAI)
 
     Rep->>Code: new message + thread_id
     Code->>Saver: load the thread for this thread_id
     Saver-->>Code: every earlier message
-    Note over Code,Saver: before_model hook: all messages (full),<br>the newest ones (trim) or a summary
+    Note over Code,Saver: middleware can change the messages:<br>trim, summarise or redact
     Code->>Model: system prompt + chosen messages
     Model-->>Code: reply (or a tool call first)
     Code->>Saver: save the new messages (checkpoint)
