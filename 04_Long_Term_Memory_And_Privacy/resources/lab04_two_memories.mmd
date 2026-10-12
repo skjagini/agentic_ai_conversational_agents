@@ -1,15 +1,15 @@
 %%{init: {"theme": "base", "flowchart": {"nodeSpacing": 40, "rankSpacing": 50, "curve": "basis"}, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "tertiaryColor": "#C9F24D", "clusterBkg": "#F4F5F7", "clusterBorder": "#0B1220"}}}%%
-%% Lab 04: short-term memory (a thread, saved by the checkpointer) and long-term memory (a store, written by a tool).
+%% Lab 04: short-term memory (a thread, saved by the checkpointer) and long-term memory (a store, written and read by tools).
 %% Export: npx -y @mermaid-js/mermaid-cli -i lab04_two_memories.mmd -o lab04_two_memories.png -b white -s 2
 flowchart LR
     subgraph ST["Short-term: one thread"]
-        T1["thread-A<br/>every message"] --> CK["checkpointer<br/>a checkpoint per step"]
+        T1["thread-A<br/>every message"] --> CK["checkpointer<br/>saves the thread"]
     end
     subgraph LT["Long-term: every thread of one rep"]
-        TOOL["save_preference tool<br/>runtime.store.put"] --> ST1[("store<br/>namespace<br/>('rep','rep-42')<br/>reply_format<br/>sign_off")]
-        ST1 --> DP["@dynamic_prompt<br/>reads the rep's memories<br/>before every model call"]
+        SAVE["save_preference tool<br/>runtime.store.put"] --> ST1[("store<br/>namespace<br/>('rep','rep-42')<br/>reply_format<br/>sign_off")]
+        ST1 --> READ["get_preferences tool<br/>runtime.store.search"]
     end
-    T1 -. "rep: 'write replies as<br/>three bullet points'" .-> TOOL
-    DP --> T2["rep 42's<br/>new threads"]
-    CTX["context: rep_id<br/>from the sign-in,<br/>never from the model"] --> TOOL
-    CTX --> DP
+    T1 -. "rep: 'write replies as<br/>three bullet points'" .-> SAVE
+    READ --> T2["rep 42's<br/>new threads"]
+    CTX["context: rep_id<br/>from the sign-in,<br/>never from the model"] --> SAVE
+    CTX --> READ
