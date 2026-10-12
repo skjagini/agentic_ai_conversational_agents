@@ -1,0 +1,22 @@
+# Direct packages for the labs, pinned. Colab installs these on top of what it already has.
+# Keep in step with pyproject.toml. Never add ipykernel here: Colab needs its own.
+langchain==1.4.3
+langchain-core==1.6.6
+langchain-openai==1.6.7
+langchain-classic==1.0.8
+langchain-text-splitters==1.1.3
+langgraph==1.2.12
+langgraph-checkpoint==4.2.0
+langgraph-checkpoint-sqlite==3.1.1
+openai==3.24.0
+tiktoken==0.14.0
+faiss-cpu==1.15.1
+gradio==6.29.0
+huggingface-hub==1.33.0
+fastapi==0.141.1
+uvicorn==0.54.0
+httpx==0.28.1
+pydantic==2.13.5
+python-dotenv==1.2.3
+langsmith==0.14.2
+matplotlib==3.10.0
