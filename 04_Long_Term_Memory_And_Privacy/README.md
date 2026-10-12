@@ -85,4 +85,4 @@ never reads its memories, a preference not used in a new thread, a deleted threa
 - [OWASP: Top 10 for Agentic Applications](https://genai.owasp.org/): ASI06, memory and context poisoning
 - [OpenAI: data controls in the API](https://developers.openai.com/api/docs/guides/your-data): what OpenAI keeps, for how long, and `store=False`
 
-Next: [Lab 05: How to turn an API into tools an agent can call](../07_Tools_Over_The_Ops_API/README.md). Back to [the lab list](../README.md).
+Next: [Lab 05: How to turn an API into tools an agent can call](../05_Tools_Over_The_Ops_API/README.md). Back to [the lab list](../README.md).
