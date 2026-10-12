@@ -1,0 +1,23 @@
+%%{init: {"theme": "base", "sequence": {"mirrorActors": false, "messageFontSize": 15, "actorFontSize": 15, "noteFontSize": 15, "wrap": false, "actorMargin": 70, "width": 230, "messageMargin": 40}, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "actorBkg": "#0B1220", "actorTextColor": "#FFFFFF", "actorBorder": "#0B1220", "noteBkgColor": "#C9F24D", "noteBorderColor": "#0B1220", "noteTextColor": "#0B1220", "signalColor": "#0B1220", "signalTextColor": "#0B1220"}}}%%
+%% Lab 09: where the run pauses before a write, and how a reviewer's decision resumes it.
+%% Export: npx -y @mermaid-js/mermaid-cli -i lab09_approval_flow.mmd -o lab09_approval_flow.png -b white -s 2
+sequenceDiagram
+    participant Rep
+    participant Agent as agent
+    participant HITL as approval
+    participant Saver as checkpointer
+    participant Reviewer
+    participant API as Ops API
+
+    Rep->>Agent: ticket 21 on thread "ticket-21"
+    Agent->>API: reads run at once: get_invoice(46)
+    Agent->>HITL: proposes file_refund_request(46, 8.91)
+    HITL->>Saver: interrupt: thread saved, nothing filed
+    HITL-->>Reviewer: result.interrupts: the exact call
+    Note over Reviewer: approve, edit or reject
+    Reviewer->>HITL: Command(resume=edit: amount 1.98), same thread_id
+    HITL->>API: POST /refund-requests (Idempotency-Key)
+    API-->>HITL: pending_review, or needs_manager over 100
+    Note over HITL,API: reject: no POST, the model reads the reason
+    HITL->>Agent: tool result
+    Agent-->>Rep: filed 1.98, waits for review
