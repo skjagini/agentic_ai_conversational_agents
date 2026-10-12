@@ -1,0 +1,24 @@
+%%{init: {"theme": "base", "flowchart": {"curve": "basis", "wrappingWidth": 360}, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "edgeLabelBackground": "#F2F4F7"}}}%%
+%% Lab 00: what each part of the notebook checks.
+%% Export: npx -y @mermaid-js/mermaid-cli -i lab00_checks.mmd -o lab00_checks.png -b white -s 2
+flowchart LR
+    NB["00_environment_check.ipynb"]
+    REQ["requirements.txt<br>19 pinned packages"]
+    SUMS["data/SHA256SUMS.txt<br>41 files"]
+    DB["data/chinook.db<br>opened read-only"]
+    API["shared/ops_api.py<br>Ops API, 127.0.0.1:8765"]
+    OAI["OpenAI API<br>CHAT_MODEL from models.env"]
+
+    NB -- "A versions" --> REQ
+    NB -- "B hashes" --> SUMS
+    NB -- "C SQL" --> DB
+    NB -- "D HTTP" --> API
+    API -- "reads" --> DB
+    NB -- "E one call" --> OAI
+
+    classDef ink fill:#0B1220,stroke:#0B1220,color:#FFFFFF
+    classDef indigo fill:#D9DDFA,stroke:#3B4AE0,color:#0B1220
+    classDef lime fill:#C9F24D,stroke:#0B1220,color:#0B1220
+    class NB ink
+    class API indigo
+    class OAI lime
