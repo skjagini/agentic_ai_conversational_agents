@@ -64,7 +64,7 @@ Luis Rocha) and a prebuilt search index. `data/README.md` gives each file's sour
 
 ## Colab setup
 
-Use it with Github Colab spaces,  
+Use it with Github Codespaces,  
 - install python and Jupyter extensions 
 - create a copy of .env file and add open ai token value
-- run the command from colab terminal curl -LsSf https://astral.sh/uv/install.sh | sh
+- run the command from code terminal curl -LsSf https://astral.sh/uv/install.sh | sh
