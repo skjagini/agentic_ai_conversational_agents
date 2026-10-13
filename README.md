@@ -17,7 +17,7 @@ day's goal and its labs. Labs marked *self-study* are complete on their own; the
 
 | Day | Lab | What you do |
 |---|---|---|
-| 1 | [00 How to set up the lab environment](00_Environment_Check/README.md) | Install, check the data hashes and one database count, start the Ops API, make one raw model call and the same call through LangChain |
+| 1 | [00 How to set up the lab environment](00_Environment_Check/README.md) | Set up on Colab or locally (with `uv` or `pip`), then check the packages, the data files, the Ops API and your key in one run |
 | 1 | [01 How to build a tool-calling agent](01_First_Chain_And_Tool/README.md) | Run the tool-calling loop by hand on the Responses API, then the same loop with `@tool` and `create_agent` |
 | 1 | [02 How to write a dialogue prompt and test it](02_Dialogue_Prompt_Versions/README.md) | Grow a plain-string prompt into sections kept in files, test it on fixed questions with checks in code, and fix a failing case with one example |
 | 1 | [03 How to give an agent memory](03_Thread_Memory_Three_Settings/README.md) | Keep a conversation in a thread, read it back from a SQLite file after a restart, keep a long thread short, and keep an email address out of what the thread stores |
@@ -30,27 +30,22 @@ day's goal and its labs. Labs marked *self-study* are complete on their own; the
 | 2 | [10 How to evaluate an agent](10_Evaluation_Set/README.md) | Write test cases as dicts, check the tools and arguments from the agent's messages, cover seven kinds of case, label each run, and ask a judge whether replies are grounded |
 | 2 | [11 How to measure an agent's latency and cost](11_Latency_Streaming_And_Cost/README.md) (self-study) | Time a streamed reply to its first words, time the evaluation cases with each check beside its seconds, keep a ledger of every model call, price each case, and read the prompt cache |
 | 2 | [12 How to guard an agent against misuse and failure](12_Guardrails_And_Injection_Test/README.md) | Run ticket 16 against the copilot with and without guards, and measure what each guard stops and what it breaks |
-| 2 | [13 How to put the copilot on a web page](13_Deploy_To_A_Space/README.md) | Serve the copilot as a Gradio chat page with one thread per visitor, then assemble the folder a Hugging Face Space builds from |
-| after | [Capstone: How to assemble the copilot and show that it works](Capstone_Chinook_Copilot/README.md) (optional) | Join the labs' pieces into one copilot and evaluate it end to end |
+| 2 | [13 How to put the agent on a web page](13_Deploy_To_A_Space/README.md) | Serve the guarded copilot as a Gradio chat page with one thread per visitor and approval in the chat, then assemble the folder a Hugging Face Space builds from |
 
-All labs run on a CPU. Every lab except Parts A to D of Lab 00 needs an OpenAI API key; the cost of a full lab
+All labs run on a CPU. Every lab except Parts A to C of Lab 00 needs an OpenAI API key; the cost of a full lab
 is a few US cents. Nothing needs a paid plan: Lab 13's push to a Hugging Face Space is optional, because creating a
 Gradio Space needs a paid Hugging Face plan.
 
 ## Setup
 
-**Colab.** Open a lab's README and use its *Open in Colab* badge. Add your OpenAI key under Secrets (the key icon
-in the left bar) as `OPENAI_API_KEY` and allow the notebook to read it. The first cell copies this repository into
-the Colab session and installs the packages.
+Follow [Lab 00](00_Environment_Check/README.md) before the first class. Its README walks through three routes, step by
+step, and its notebook checks the result in one run:
 
-**Local.** Install [uv](https://docs.astral.sh/uv/), then from the repository folder:
-
-```bash
-uv sync
-cp .env.example .env
-```
-
-Fill in the keys you need in `.env`, open a notebook in JupyterLab or VS Code and pick the `.venv` kernel.
+- **Colab:** the *Open in Colab* badge in each lab's README, and your OpenAI key under Secrets. Nothing to install.
+- **Local with `uv`:** `git clone` (or the ZIP), `uv sync`, copy `.env.example` to `.env` with your key, then
+  `uv run jupyter lab`.
+- **Local with `pip`:** Python 3.13, a virtual environment, `pip install -r requirements.txt jupyterlab==4.6.4
+  ipykernel==7.4.0`, the same `.env`, then `jupyter lab`.
 
 **Models.** Every lab reads its model names and prices from `models.env` in the repository root. The default chat
 model is `gpt-4o-mini`. To switch every lab to another model, change that file once; to try one on your own machine

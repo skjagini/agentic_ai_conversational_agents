@@ -34,10 +34,4 @@ page others can use.
 | 10 | [How to evaluate an agent](10_Evaluation_Set/README.md) | in class |
 | 11 | [How to measure an agent's latency and cost](11_Latency_Streaming_And_Cost/README.md) | self-study |
 | 12 | [How to guard an agent against misuse and failure](12_Guardrails_And_Injection_Test/README.md) | in class |
-| 13 | [How to put the copilot on a web page](13_Deploy_To_A_Space/README.md) | in class |
-
-## After the course
-
-| | Title | |
-|---|---|---|
-| Capstone | [How to assemble the copilot and show that it works](Capstone_Chinook_Copilot/README.md) | optional |
+| 13 | [How to put the agent on a web page](13_Deploy_To_A_Space/README.md) | in class |
