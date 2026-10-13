@@ -1,0 +1,37 @@
+%%{init: {"theme": "base", "flowchart": {"nodeSpacing": 35, "rankSpacing": 45, "curve": "basis", "wrappingWidth": 380, "htmlLabels": true}, "markdownAutoWrap": false, "themeVariables": {"fontFamily": "IBM Plex Mono, monospace", "fontSize": "15px", "primaryColor": "#FFFFFF", "primaryBorderColor": "#0B1220", "primaryTextColor": "#0B1220", "lineColor": "#6B7383", "clusterBkg": "#F4F5F7", "clusterBorder": "#6B7383"}}}%%
+%% Lab 02: how one case is executed and scored
+%% Export: npx -y @mermaid-js/mermaid-cli -i lab02_case_score_flow.mmd -o lab02_case_score_flow.png -b white -s 2
+flowchart TB
+    subgraph KEY["Answer Key (CASES dict — static)"]
+        direction TB
+        C["<b>case = CASES['big_refund']</b><br/>• question: 'A customer wants...'<br/>• policy: ['refunds', 'escalations']<br/>• fact: ['escalat']"]
+    end
+
+    subgraph EXEC["Agent Execution (ask function — dynamic)"]
+        direction TB
+        A["<b>agent</b><br/>prompt + get_policy"]
+        R["<b>run</b><br/>• fetched: ['refunds']<br/>• reply: 'You can approve...'"]
+        A -->|"runs ask(agent, question)"| R
+    end
+
+    subgraph SCORING["Validation (score function)"]
+        direction TB
+        S["<b>score(case, run)</b>"]
+        P["<b>right_policy(case, run)</b><br/>checks run['fetched'] against case['policy']"]
+        F["<b>has_fact(case, run)</b><br/>checks run['reply'] against case['fact']"]
+        S --> P
+        S --> F
+    end
+
+    RES["<b>result</b><br/>{'right_policy': True, 'has_fact': False}"]
+
+    C -->|"passes question"| A
+    C -->|"passes case"| S
+    R -->|"passes run"| S
+    P --> RES
+    F --> RES
+
+    classDef lime fill:#C9F24D,stroke:#0B1220,color:#0B1220
+    classDef dark fill:#0B1220,stroke:#0B1220,color:#FFFFFF
+    class RES lime
+    class S dark
