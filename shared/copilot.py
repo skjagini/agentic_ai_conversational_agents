@@ -1,6 +1,6 @@
 """The copilot's handbook search, for labs that use it after it was taught.
 
-Lab 08 builds the vector store, `search()` and `search_policies` cell by cell. Later labs (09 to 13, the capstone)
+Lab 08 builds the vector store, `search()` and `search_policies` cell by cell. Later labs (09 to 13)
 import them from here instead of copying them. Read Lab 08's notebook to learn them; this file only collects the
 finished pieces.
 
@@ -13,8 +13,8 @@ tool message's artifact, so code can read the retrieved files and scores without
 Since 12 Oct 2026 (revision C08, decision D10) the search runs on LangChain's InMemoryVectorStore, built from the 20
 policy files in data/corpus/ (the files the handbook is made from) the first time it is needed, so no lab reads the
 prebuilt FAISS index in data/index/ any more. The store is built on first use, not at import, so importing this
-module (for `load_prompt`, say) needs no key and makes no call. `build_index` (FAISS) stays only for
-shared/guards.py's ticket search and Lab 12 until that lab moves to `build_store` and the `rep` filter.
+module (for `load_prompt`, say) needs no key and makes no call. Since revision C12 (13 Oct 2026) the ticket search in
+shared/guards.py uses `build_store` and the `rep` filter too, so nothing here uses FAISS (Lab 07 builds its own index).
 """
 from __future__ import annotations
 
@@ -100,17 +100,3 @@ def search_policies(query: str) -> tuple[str, list[dict]]:
     found = [{"source": doc.metadata["source"], "score": round(score, 4)} for doc, score in hits]
     return text, found
 
-
-# ------------------------------------------------------------------ FAISS, kept for shared/guards.py (Lab 12)
-def build_index(chunks: list[dict], emb):
-    """Embed every chunk once and add the unit vectors to an exact inner-product index (scores are cosines).
-
-    Lab 07 teaches this; only shared/guards.py's ticket search and Lab 12 still use it.
-    """
-    import faiss
-    import numpy as np
-    vectors = np.array(emb.embed_documents([c["text"] for c in chunks]), dtype="float32")
-    faiss.normalize_L2(vectors)
-    index = faiss.IndexFlatIP(vectors.shape[1])
-    index.add(vectors)
-    return index

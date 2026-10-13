@@ -207,13 +207,27 @@ def serve(port: int = 8765, fresh: bool = True):
     return server
 
 
+_started = {}                          # port -> the server this kernel started
+
+
 def start_ops_api(port: int = 8765):
     """Start the API once per session and return its server.
 
-    If a server already answers /health on this port (a cell run twice, or another notebook),
-    reuse it and return None, so a second start never fails on a busy port.
+    Run twice in one kernel, it returns the server it started the first time, so a stop cell can still stop it.
+    If another notebook's kernel serves the port, it reuses that API and returns None: only that notebook can stop it.
     """
     url = f"http://127.0.0.1:{port}"
+    mine = _started.get(port)
+    if mine is not None and not mine.should_exit:
+        print(f"Ops API already running at {url}: reusing it")
+        return mine
+    if mine is not None:                       # stopped in this kernel: wait until it lets go of the port
+        for _ in range(50):
+            try:
+                httpx.get(f"{url}/health", timeout=0.2)
+            except httpx.HTTPError:
+                break
+            time.sleep(0.1)
     try:
         if httpx.get(f"{url}/health", timeout=1.0).status_code == 200:
             print(f"Ops API already running at {url}: reusing it")
@@ -221,5 +235,6 @@ def start_ops_api(port: int = 8765):
     except httpx.HTTPError:
         pass                                   # nothing answers yet: start one
     server = serve(port)
+    _started[port] = server
     print(f"Ops API started at {url}")
     return server

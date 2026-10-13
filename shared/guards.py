@@ -1,32 +1,37 @@
-"""The copilot's guards: reply checks, a flag for planted instructions, moderation and a per-rep ticket search.
+"""The copilot's guards: reply checks, a check on tool results, moderation and a per-rep ticket search.
 
-Lab 11 writes the reply checks cell by cell; Lab 12 writes the flag, the ticket wrapper, the moderation call and the
-per-rep search. Later labs (13, the capstone) import them from here. Read those labs' notebooks to learn them; this
-file only collects the finished pieces.
+Who writes what (since revision C12, 13 Oct 2026): Lab 12 writes the reply checks (`check_not_obeyed`,
+`check_no_phone`), the flag for planted instructions and the tool-result check (`flag_instructions`,
+`remove_flagged_lines`), the moderation call and the per-rep ticket search, cell by cell. Lab 13 imports
+them from here. `as_ticket` wraps pasted text for the prompt's <ticket> rule (Lab 02 teaches the rule); no lab uses
+it since C13 (Lab 13's page has no paste box). The citation checks (`cited_files`, `check_citations_exist`, `check_cited_files_received`) come from the
+evaluation lab as it was before the revision and are used by no lab since the capstone was dropped (13 Oct 2026); Lab 08 writes its own `cited_files`. Read
+those labs' notebooks to learn the pieces; this file only collects the finished ones.
 
-Adapted from the course's tools/D02/guards.py (5 Oct 2026). Changes: the reply checks are Lab 11's, as written in its
-notebook, so each takes a case dict (`reply`, `received`) instead of `(reply, received)` arguments, and the second
-citation check keeps Lab 11's name, `check_cited_files_received`; nothing is read from the environment (the course read
+Adapted from the course's tools/D02/guards.py (5 Oct 2026). Changes: each reply check takes a case dict (`reply`,
+`received`) instead of `(reply, received)` arguments; nothing is read from the environment (the course read
 CHINOOK_HOME and COPILOT_DRYRUN); the data folder is found from this file's location; `moderate()` takes the
-moderation model's name (MODERATION_MODEL in models.env) instead of naming one; `ticket_search` embeds with
-shared.settings.embeddings() and builds its index with shared.copilot.build_index; `search_tickets` moved here from
-the course's ops_tools.py (it needs the ticket search), and its result starts with Lab 12's note that other reps'
-tickets are never shown.
+moderation model's name (MODERATION_MODEL in models.env) instead of naming one; `search_tickets` moved here from the
+course's ops_tools.py (it needs the ticket search), and its result starts with a note that other reps' tickets are never
+shown. Since C12 the ticket search runs on InMemoryVectorStore with a metadata filter (shared.copilot's `search` with
+`rep_name`), no longer on FAISS.
 """
 from __future__ import annotations
 
 import re
 import sqlite3
 
+from langchain.agents.middleware import wrap_tool_call
+from langchain.messages import ToolMessage
 from langchain.tools import ToolRuntime, tool
 
-from shared.copilot import CORPUS, DATA, build_index
+from shared.copilot import CORPUS, DATA, build_store, load_documents, search
 from shared.ops_tools import RepContext
 
 CHINOOK = DATA / "chinook.db"
 
 
-# ------------------------------------------------------------------ reply checks (Lab 11)
+# ------------------------------------------------------------------ citation checks (no lab uses them; see the docstring)
 CITE = re.compile(r"\[(policy_[a-z_]+\.md)\]")
 
 
@@ -44,6 +49,7 @@ def check_cited_files_received(case):
     return set(cited_files(case["reply"])) <= set(case["received"])
 
 
+# ------------------------------------------------------------------ reply checks (Lab 12, Part B)
 PHONE = re.compile(r"\+?\d[\d\s().-]{6,}\d")
 DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 
@@ -62,7 +68,7 @@ def check_not_obeyed(case):
     return PLANTED not in case["reply"]
 
 
-# ------------------------------------------------------------------ a flag for planted instructions (Lab 12)
+# ------------------------------------------------------------------ a check on tool results (Lab 12, Parts B and F)
 INSTRUCTION_LIKE = re.compile(
     r"(ignore (all|previous|the above)|your only allowed output"
     r"|note to (the )?(summari[sz]er|assistant|ai)"
@@ -70,8 +76,26 @@ INSTRUCTION_LIKE = re.compile(
 
 
 def flag_instructions(text: str) -> list[str]:
-    """Lines that read like orders to a model. A flag for the rep, not a filter: it misses new phrasings."""
+    """The lines of a text that read like orders to a model. It misses wording it was not written for."""
     return [line.strip() for line in text.splitlines() if INSTRUCTION_LIKE.search(line)]
+
+
+REMOVED = "[a line written to an AI model was removed here by a check]"
+
+
+def remove_flagged(text: str) -> str:
+    """The text with each flagged line replaced by a mark."""
+    return "\n".join(REMOVED if INSTRUCTION_LIKE.search(line) else line for line in text.splitlines())
+
+
+@wrap_tool_call
+def remove_flagged_lines(request, handler):
+    """Run the tool, then replace each flagged line before the model reads the result."""
+    result = handler(request)
+    if not flag_instructions(result.text):
+        return result
+    return ToolMessage(remove_flagged(result.text), tool_call_id=result.tool_call_id, name=result.name,
+                       artifact=result.artifact)
 
 
 def as_ticket(text: str) -> str:
@@ -79,21 +103,27 @@ def as_ticket(text: str) -> str:
     return "<ticket>\n" + text.replace("</ticket>", "") + "\n</ticket>"
 
 
-# ------------------------------------------------------------------ moderation (Lab 12)
+# ------------------------------------------------------------------ moderation (Lab 12, Part C)
 def moderate(text: str, model: str, client=None) -> dict:
     """One call to OpenAI's moderation endpoint: flagged, the categories that fired, and the top score."""
     if client is None:
         from openai import OpenAI
         client = OpenAI()
     result = client.moderations.create(model=model, input=text).results[0]
+    scores = result.category_scores.model_dump()
     fired = sorted(name for name, hit in result.categories.model_dump().items() if hit)
-    top = max(result.category_scores.model_dump().items(), key=lambda item: item[1] or 0)
-    return {"flagged": result.flagged, "categories": fired, "top_score": (top[0], round(top[1], 4))}
+    top = max(scores, key=lambda name: scores[name] or 0)
+    return {"flagged": result.flagged, "fired": fired, "top": (top, round(scores[top], 4))}
 
 
-# ------------------------------------------------------------------ who may read which ticket (Lab 12)
+# ------------------------------------------------------------------ who may read which ticket (Lab 12, Part D)
+# Tickets 03 to 16 name no customer (a country, an email on file, another ticket's thread), checked by hand, so every
+# rep may read them. A ticket is shared only when it is on this list: a name the lookup cannot match goes to no one.
+SHARED_TICKETS = set(range(3, 17))
+
+
 def ticket_reader(path) -> str:
-    """The rep assigned to the ticket's customer in chinook.db, or "all reps" when it names no customer we can find."""
+    """The rep of the ticket's customer in chinook.db; "all reps" for a ticket on SHARED_TICKETS; otherwise "no one"."""
     text = path.read_text(encoding="utf-8")
     match = re.search(r"^Customer: (.+)$", text, re.M)
     name = (match.group(1).strip() if match else "").replace("ý", "y")
@@ -103,38 +133,25 @@ def ticket_reader(path) -> str:
            JOIN employees e ON e.EmployeeId = c.SupportRepId
            WHERE replace(c.FirstName || ' ' || c.LastName, 'ý', 'y') = ?""", (name,)).fetchone()
     db.close()
-    return row[0] if row else "all reps"
+    if row:
+        return row[0]
+    number = int(path.name.split("_")[1])          # ticket_01_helena_wrong_album.md -> 1
+    return "all reps" if number in SHARED_TICKETS else "no one"
 
 
-def readable(files, rep_name: str) -> list:
-    """Policies are for every rep; a ticket follows its customer's rep."""
-    return [f for f in files if f.name.startswith("policy_") or ticket_reader(f) in ("all reps", rep_name)]
+_STORES: dict = {}
 
 
-_TICKETS: dict = {}
-
-
-def ticket_search(query: str, rep_name: str, k: int = 3, emb=None) -> list[tuple[float, dict]]:
-    """The k tickets closest to a query that this rep may read, as (cosine score, chunk) pairs.
-
-    The filter runs inside the search (a FAISS ID selector), so a hidden ticket never reaches the model.
-    The 16 tickets are embedded once, with EMBED_MODEL from models.env unless you pass another client.
-    """
-    import faiss
-    import numpy as np
-    if "index" not in _TICKETS:
-        if emb is None:
-            from shared.settings import embeddings
-            emb = embeddings()
-        chunks = [{"text": f.read_text(encoding="utf-8"), "source": f.name, "reader": ticket_reader(f)}
-                  for f in sorted(CORPUS.glob("ticket_*.md"))]
-        _TICKETS.update(index=build_index(chunks, emb), chunks=chunks, emb=emb)
-    index, chunks, emb = _TICKETS["index"], _TICKETS["chunks"], _TICKETS["emb"]
-    allowed = np.array([i for i, c in enumerate(chunks) if c["reader"] in ("all reps", rep_name)], dtype="int64")
-    vector = np.array([emb.embed_query(query)], dtype="float32")
-    faiss.normalize_L2(vector)
-    scores, ids = index.search(vector, k, params=faiss.SearchParameters(sel=faiss.IDSelectorBatch(allowed)))
-    return [(float(score), chunks[i]) for score, i in zip(scores[0], ids[0]) if i >= 0]
+def ticket_store():
+    """The 16 tickets in a vector store, each with its reader in the metadata unless it is shared; built once."""
+    if "tickets" not in _STORES:
+        documents = load_documents(CORPUS.glob("ticket_*.md"))
+        for doc in documents:
+            reader = ticket_reader(CORPUS / doc.metadata["source"])
+            if reader != "all reps":
+                doc.metadata["rep"] = reader
+        _STORES["tickets"] = build_store(documents)
+    return _STORES["tickets"]
 
 
 FILTER_NOTE = ("Only tickets for your own customers and tickets that name no customer are searched; "
@@ -143,13 +160,13 @@ FILTER_NOTE = ("Only tickets for your own customers and tickets that name no cus
 
 @tool(parse_docstring=True)
 def search_tickets(query: str, runtime: ToolRuntime[RepContext]) -> str:
-    """Return the 3 tickets closest to a query that this rep may read.
+    """Search the support tickets for the three closest to a query.
 
     Each ticket starts with its file name in square brackets.
 
     Args:
         query: What the rep is looking for, in a short sentence.
     """
-    hits = ticket_search(query, runtime.context.rep_name)
-    found = "\n\n".join(f"[{chunk['source']}]\n{chunk['text']}" for score, chunk in hits) or "No ticket found."
+    hits = search(query, k=3, store=ticket_store(), rep_name=runtime.context.rep_name)
+    found = "\n\n".join(f"[{doc.metadata['source']}]\n{doc.page_content}" for doc, score in hits)
     return FILTER_NOTE + "\n\n" + found

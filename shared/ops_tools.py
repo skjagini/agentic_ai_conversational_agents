@@ -1,7 +1,7 @@
 """The copilot's Day 2 tools: model-facing contracts backed by the Chinook Ops API over HTTP.
 
 Lab 05 writes the read tools cell by cell; Lab 09 writes the write tool, the approval step and the idempotency key.
-Later labs and the capstone import them from here. Read a lab's notebook to learn them; this file only collects the
+Later labs import them from here. Read a lab's notebook to learn them; this file only collects the
 finished pieces. (Lab numbers follow the revision plan; the folders are renamed in session D.)
 
 Each tool is a name, a description and typed arguments the model sees; the body is ordinary code that calls the API

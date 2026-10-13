@@ -5,11 +5,14 @@ so that later labs (Lab 11 times these cases) can run the same set without runni
 in Lab 10, change it here too.
 
 A case is a dict: the rep's message (`input`), what a good run does (`want`, for people), the tools that must be called
-with the arguments that matter (`calls`), the tools that must never be called (`never`), and text the reply must or
-must not contain (`reply_has`, `reply_lacks`). `decision` is the reviewer's reason when a write is rejected; `api_down`
-asks the runner to point the tools at a closed port.
+with the arguments that matter (`calls`), the tools that must never be called (`never`), text the reply must or
+must not contain (`reply_has`, `reply_lacks`), numbers it must state (`numbers`) or no number at all (`no_numbers`).
+`decision` is the reviewer's reason when a write is rejected; `api_down` asks the runner to point the tools at a
+closed port.
 """
 from __future__ import annotations
+
+import re
 
 
 def tool_calls(messages):
@@ -28,9 +31,17 @@ def check_calls(case, calls):
     return problems
 
 
+def numbers(text):
+    """Every number the text states, as written: "$1,049.62" gives "1049.62"."""
+    return re.findall(r"\d+(?:\.\d+)?", text.replace(",", ""))
+
+
 def check_reply(case, reply):
     problems = [f"reply lacks {text!r}" for text in case.get("reply_has", []) if text.lower() not in reply.lower()]
     problems += [f"reply has {text!r}" for text in case.get("reply_lacks", []) if text.lower() in reply.lower()]
+    problems += [f"reply lacks the number {n}" for n in case.get("numbers", []) if n not in numbers(reply)]
+    if case.get("no_numbers") and numbers(reply):
+        problems.append(f"reply states numbers {numbers(reply)}")
     return problems
 
 
@@ -65,7 +76,7 @@ lookup = {
     "want": "Find Helena (customer 6) and read her invoices: 7 invoices, 49.62 in total. File nothing.",
     "calls": {"find_customer": {"name": "Helena Holý"}, "get_customer_invoices": {"customer_id": 6}},
     "never": ["file_refund_request"],
-    "reply_has": ["49.62"],
+    "numbers": ["7", "49.62"],
 }
 missing_argument = {
     "id": "missing argument",
@@ -89,7 +100,7 @@ tool_failure = {
     "input": "How many invoices does Helena Holý have, and what do they add up to?",
     "want": "Say the lookup failed. Give no count and no total.",
     "calls": {"find_customer": {"name": "Helena Holý"}},
-    "reply_lacks": ["49.62"],
+    "no_numbers": True,
     "api_down": True,
 }
 out_of_scope = {
