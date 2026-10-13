@@ -43,8 +43,8 @@ read what the trim left in the file, and read the summary.
 again, then save with `durability="exit"`.
 **Going further.** Trim by tokens; delete one message with `RemoveMessage`; read the checkpoint history; clear old
 tool results with `ContextEditingMiddleware`.
-**Challenge.** Mask a card number and count the rows that hold it; compare one all-day thread with a thread per
-customer.
+**Challenge.** From a starter cell with two named agents: mask a card number and count the rows that hold it;
+compare one all-day thread with a thread per customer by what each thread saved.
 
 ## Checkpoints
 

@@ -2,18 +2,18 @@
 %% Lab 13: one message from a visitor's browser to the copilot and back.
 %% Export: npx -y @mermaid-js/mermaid-cli -i lab13_page_flow.mmd -o lab13_page_flow.png -b white -s 2
 flowchart TB
-    browser["a visitor's browser<br/>message + pasted ticket"]
+    browser["a rep's browser tab<br/>one message"]
     subgraph page["respond(), your Gradio function"]
         thread["thread_id = the visitor's session (B)"]
         waiting{"a refund waiting<br/>for approval?"}
         resume["Approve button or typed reason<br/>→ resume the paused run (D)"]
-        newturn["flag lines, wrap the paste<br/>in &lt;ticket&gt; tags"]
+        newturn["the message,<br/>as a new turn"]
         steps["stream tool steps, folded (C)"]
         check["check the reply in code,<br/>then show it (C)"]
         ask["show the waiting refund<br/>with an Approve button (D)"]
     end
     subgraph agent["the guarded copilot from Lab 12"]
-        copilot["moderation · model with retry and fallback<br/>tools · approval before file_refund_request"]
+        copilot["moderation · model retry and fallback<br/>tools, ticket search with retry<br/>flagged lines removed from tool results<br/>approval before file_refund_request"]
     end
     api["Ops API"]
     key["OPENAI_API_KEY from the environment:<br/>.env locally, a secret on a Space (E, F)"]

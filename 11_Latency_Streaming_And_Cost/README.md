@@ -40,7 +40,7 @@ every kind of token, and count a summarising conversation from the saved thread 
 **Part E: Price a call and a case.** The prices from `models.env`, one call by hand, `call_cost`, the conversation
 both ways, and every case beside its check.
 **Part F: Read the prompt cache.** A short and a long prompt five times each, with and without a `prompt_cache_key`.
-**Going further.** Reasoning effort and reasoning tokens on `REASONING_MODEL` (behind its switch), `stream_events`
+**Going further.** Reasoning effort and reasoning tokens on `REASONING_MODEL` (empty by default, so it is skipped), `stream_events`
 (v3), tags and metadata, LangSmith, and `ModelCallLimitMiddleware`.
 **Challenge.** A token budget per thread with a handover; make the fast case pass and time it again; how steady the
 spread is over ten runs.
@@ -50,13 +50,13 @@ spread is over ten runs.
 | After | You should see |
 |---|---|
 | Part A | Helena's question: three model calls, 7 invoices, 49.62 |
-| Part B | a first text from the `tools` node, then the fixed timer's first text later (ours: 0.99 s from `tools`, then 3.62 s) |
+| Part B | a first text from the `tools` node, then the fixed timer's first text later (ours: 1.13 s from `tools`, then 2.57 s) |
 | Part C | a check beside every timing; *expired link* among the fastest, with no search and a failed check (ours: *expired link* fastest at about 1 s, 0 of 3 passed) |
 | Part D | fewer calls in the saved thread than in the ledger, one `summarization` (ours: 5 calls in the thread, 9 in the ledger) |
-| Part E | the same cost by hand and by `call_cost`; a cost beside each case's check (ours: $0.000124 both ways; *lookup* $0.000395 a case) |
-| Part F | the short prompt never cached; the long one more often with a key (ours: 0 of 5; 1 of 5 without a key, 4 of 5 with one) |
+| Part E | the same cost by hand and by `call_cost`; a cost beside each case's check (ours: $0.000124 both ways; *lookup* $0.000398 a case) |
+| Part F | the short prompt never cached; the long one more often with a key (ours: 0 of 5; 0 of 5 without a key, 4 of 5 with one) |
 
-The saved outputs come from `gpt-4o-mini` on 12 Oct 2026 (Python 3.13.5, macOS, a fresh `uv sync`). Seconds depend on
+The saved outputs come from `gpt-4o-mini` on 13 Oct 2026 (Python 3.13.5, macOS, a fresh `uv sync`). Seconds depend on
 your network and load, and model runs vary, and differ again if `models.env` names another model: compare which cases
 are fast and whether they passed, not our seconds.
 
@@ -69,11 +69,11 @@ are fast and whether they passed, not our seconds.
   Open the notebook in JupyterLab (`uv run jupyter lab`) or VS Code and choose the `.venv` kernel.
 - **Prices:** `models.env` holds the chat model's prices with their check date. Check them on OpenAI's pricing page
   before you teach, and change them there if you change the model.
-- **Optional:** the reasoning demo in Going further calls `REASONING_MODEL` (set in `models.env`; empty the line if
-  your account does not allow it). LangSmith needs `LANGSMITH_API_KEY` and `RUN_LANGSMITH = True`.
+- **Optional:** the reasoning demo in Going further runs only when `REASONING_MODEL` is set (empty in `models.env`;
+  set it there or in `.env` to a reasoning model your account allows, with its prices). LangSmith needs `LANGSMITH_API_KEY` and `RUN_LANGSMITH = True`.
 - **Data:** `data/chinook.db`, read by the Ops API, and the policy files in `data/corpus/`, embedded on first use by
   `search_policies`. No refund is filed: every proposed write is rejected.
-- **Cost:** about 130 calls to the chat model and 150,000 input tokens, about 3 US cents with `gpt-4o-mini` (counted from the run's structure), plus 9 calls to `REASONING_MODEL` in Going further, about 2 US cents with `gpt-5`.
+- **Cost:** about 130 calls to the chat model and 150,000 input tokens, about 3 US cents with `gpt-4o-mini` (counted from the run's structure). With `REASONING_MODEL` set, Going further adds 9 calls to it, about 2 US cents with `gpt-5`.
 
 ## Resources
 

@@ -42,17 +42,17 @@ messages.
 **Part E: Choose a workflow or an agent.** Read the runs, tell a misroute from a request no route covers, decide the
 shape for four support jobs, and decide the copilot's.
 **Going further.** The same workflow as a LangGraph `StateGraph`.
-**Challenge.** A step for the albums, and a label in front of the agent.
+**Challenge.** From starter cells: a step for the albums, checked three ways, and a label in front of the agent.
 
 ## Checkpoints
 
 | After | You should see |
 |---|---|
-| Part A | `label='account_lookup' customer_name='Puja Srivastava' invoice_ids=[]`; the same label and arguments for all four requests in 3 of 3 runs (an earlier run labelled the poem `policy_question` once) |
+| Part A | `label='account_lookup' customer_name='Puja Srivastava' invoice_ids=[]`; the same label and arguments for all four requests in 3 of 3 runs |
 | Part B | Puja: customer 59, 6 invoices, 36.64; ticket 14: a note on two 9.99 charges for the same album on the same date, 2 calls; the poem: the fixed reply, 1 call |
 | Part C | `find_customer`, then `get_customer_invoices` with `customer_id` 59; 6 invoices, 36.64; 3 model calls |
 | Part D, one reply | check 1 `True` on the workflow's reply to request 1; `False` on a reply without the total |
-| Part D | requests 1 and 2: 5 of 5 in both shapes, the workflow at 2 calls and about half the agent's tokens; the poem: workflow 5 of 5, agent 0 of 5; request 4: workflow 0 of 5, agent 5 of 5 at 4 calls and about 2,020 tokens |
+| Part D | requests 1 and 2: 5 of 5 in both shapes, the workflow at 2 calls and about half the agent's tokens; the poem: workflow 5 of 5, agent 0 of 5; request 4: workflow 0 of 5, agent 5 of 5 at 4 calls and about 2,030 tokens, all five albums named |
 | Part E | the four jobs: workflow, workflow, agent, agent, each with its deciding fact |
 | Going further | `classify`, `account_lookup`, `draft`, each adding its own key, 2 calls |
 

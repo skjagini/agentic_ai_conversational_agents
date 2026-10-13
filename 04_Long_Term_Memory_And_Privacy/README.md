@@ -45,7 +45,8 @@ own preference; count the Czech replies to rep 42's next five customers, and to 
 thread, run one rep's day, then delete one customer's threads and the memories saved from them.
 **Going further.** Free key names; memories read in the prompt with `@dynamic_prompt`, as a plain list and as an
 instruction; a save tool told what not to save; what deleting in your code does not reach (`store=False`).
-**Challenge.** A namespace per customer for customer wishes; a tool that lets the rep forget a preference.
+**Challenge.** A namespace per customer for customer wishes, in three steps with starter cells; a tool that lets the
+rep forget a preference, from a store that holds only the old mistake.
 
 ## Checkpoints
 

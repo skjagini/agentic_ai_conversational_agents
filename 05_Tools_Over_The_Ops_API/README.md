@@ -17,7 +17,8 @@ looks up her real invoices and tells the rep that her first invoice is number 46
 - How to call an HTTP API with `httpx` and a timeout, and tell a 200, a 404 and a connection error apart.
 - How to turn a function into a `@tool`, describe an argument with a Pydantic model, and print the schema.
 - How to build a lookup agent with `create_agent` and check its answer against the API in code.
-- How to pass the rep's identity as context through `ToolRuntime`, so nothing typed in the chat can change it.
+- How to pass the rep's identity as context through `ToolRuntime`, so nothing typed in the chat can change it, and
+  check it in every tool that returns a customer's data.
 - How to return errors as data so the model can recover, and what happens to a malformed argument.
 - How to retry a failing call with `ToolRetryMiddleware` and cap a run's calls with `ToolCallLimitMiddleware`.
 
@@ -36,14 +37,16 @@ with a Pydantic argument (`Field(gt=0)`), its schema printed and 0 refused; `get
 **Part C: Build the lookup agent.** `create_agent` with the three tools, one question followed through its messages,
 and the three facts checked in code over three more runs.
 **Part D: Pass the rep's identity as context.** A tool that shows a customer's invoices only to the customer's rep:
-first with the rep in the prompt and in an argument, then from `ToolRuntime` context.
+first with the rep in the prompt and in an argument, then from `ToolRuntime` context; then the same check in
+`get_invoice`, which still showed Jane a customer's invoice.
 **Part E: Return errors the model can read.** The question about invoice 466 with a tool that raises, then with
 *Not found* returned as data; the scripted model's code, then a malformed argument from it.
-**Part F: Handle a failing service and cap the calls.** The API stopped, `ToolRetryMiddleware` with your own failure
+**Part F: Handle a failing service and cap the calls.** The API unreachable, `ToolRetryMiddleware` with your own failure
 message, and `ToolCallLimitMiddleware` on a scripted model that never fixes its call.
 **Going further.** The same tools served over MCP with `langchain.mcp`; a name typed without its accent; whether the
 model follows the "when" in a tool description.
-**Challenge.** Check the rep in `get_invoice` too; a missing invoice with no customer named.
+**Challenge.** Write a code check for a reply about a missing invoice, test it on four hand-written replies, then
+on the copilot's.
 
 ## Checkpoints
 
@@ -52,9 +55,9 @@ model follows the "when" in a tool description.
 | Part A | Helena: customer 6, Czech Republic, Steve Johnson; 7 invoices, 49.62, the first is 46; invoice 466: 404 `No invoice 466`; port 8799: `ConnectError` |
 | Part B | `find_customer` with one string argument `name`; `get_invoice`'s schema with `"exclusiveMinimum": 0`; 0 refused with *Input should be greater than 0* |
 | Part C | `find_customer`, then `get_customer_invoices` with `customer_id` 6; all three facts (3 of 3 checked runs) |
-| Part D | `rep_name` as an argument: `Jane Peacock` for a passing claim, `Steve Johnson` when the message asks for it (3 of 3 each); from context with Jane signed in: *Not allowed* every time; Steve signed in: 7 invoices |
+| Part D | `rep_name` as an argument: `Jane Peacock` for a passing claim, `Steve Johnson` when the message asks for it (3 of 3 each); from context with Jane signed in: *Not allowed* every time; Steve signed in: 7 invoices; `get_invoice` without the check shows Jane invoice 46 (3 of 3), with it *Not allowed* (3 of 3) |
 | Part E | the tool that raises: `HTTPStatusError`, no reply; *Not found* as data: the model looks up her invoices and names invoice 46 (3 of 3 runs); scripted: an error tool message, then 46 |
-| Part F | API stopped: `ConnectError`; with `ToolRetryMiddleware`: *failed after 3 attempts with ConnectError*, then your own message; scripted loop: 11 model calls, 4 with `run_limit=3` |
+| Part F | API unreachable: `ConnectError`; with `ToolRetryMiddleware`: *failed after 3 attempts with ConnectError*, then your own message; scripted loop: 11 model calls, 4 with `run_limit=3` |
 
 The saved outputs come from `gpt-4o-mini` on 13 Oct 2026 (Python 3.13.5, macOS, a fresh `uv sync`). Parts A and B and
 the scripted cells give the same values every time. Model runs vary, and differ again if `models.env` names another
@@ -69,9 +72,9 @@ model: compare the tool calls and the facts, not our wording.
   Open the notebook in JupyterLab (`uv run jupyter lab`) or VS Code and choose the `.venv` kernel.
 - **Data:** `data/chinook.db`, read in place by the Ops API (`shared/ops_api.py`), opened read-only. Nothing is
   downloaded except `fastmcp` in Going further.
-- **Cost:** about 110 calls to the chat model, a few US cents with `gpt-4o-mini`.
+- **Cost:** about 125 calls to the chat model, a few US cents with `gpt-4o-mini`.
 
-The notebook ends with a troubleshooting table: the API not running or started by another notebook, docstring errors
+The notebook ends with a troubleshooting table: the API not running or still pointed at port 8799, docstring errors
 in `@tool`, a 404 that stops the run, a missing `context=`, and a missing key.
 
 ## Resources

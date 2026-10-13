@@ -40,21 +40,21 @@ wording request with the same tool: the model decides which needs it.
 **Part F: Build the same agent with LangChain.** Wrap `get_policy` with `tool`, print its schema beside yours, build
 the model with `ChatOpenAI` and read the `chat_model` helper later labs use, run `create_agent` and display its graph,
 and list what LangChain now does for you and what is still yours.
-**Challenge.** Put the policy names in the tool's description, cap the agent loop with a call limit, and check which
-policy an answer really came from.
+**Challenge.** Put the policy names in the tool's description and check which policy an answer really came from,
+with a cell that counts the model calls; as an extension, cap the loop with a call limit.
 
 ## Checkpoints
 
 | After | You should see |
 |---|---|
-| Part A | a period that is not Chinook's 90 days (ours: 30 days); about 30 input tokens and 0 reasoning tokens; one `message` item |
+| Part A | a period that is not Chinook's 90 days (ours: 14 days); about 30 input tokens and 0 reasoning tokens; one `message` item |
 | Part B | the follow-up alone knows nothing about download links; with the history it shortens the first answer, with more input tokens |
 | Part C | `output_text` empty and one `function_call` for `get_policy` with a JSON string of arguments |
 | Part D | the answer gives 90 days after purchase and one new link that lasts 7 days, after 2 model calls, or 3 when the first policy name is wrong |
 | Part E | the download question reads `digital_downloads` (after a wrong name, in our run); the wording request reads no policy |
 | Part F | the same name, description and argument in both schemas; `chat_model`'s source builds the same `ChatOpenAI`; a `CompiledStateGraph` whose `model` and `tools` nodes are your loop; the agent's messages map onto your loop; the wording request gives 2 messages |
 
-The saved outputs come from `gpt-4o-mini` on 12 Oct 2026. Replies and counts change from run to run, and from model
+The saved outputs come from `gpt-4o-mini` on 13 Oct 2026. Replies and counts change from run to run, and from model
 to model if `models.env` names another one: check the facts (90 days, 7 days) and the shape of the run, not the
 wording.
 

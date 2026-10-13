@@ -38,7 +38,8 @@ pause; one run, read as a trace.
 double-charge question, whose reply passes and whose trace fails.
 **Part C: Write the seven kinds of case.** Five more dicts; `run_case`, which rejects every proposed write, can take
 the Ops API down, and reads the API's table before and after.
-**Part D: Label the runs, then score them.** Your labels first, then the check on all seven, case by case.
+**Part D: Label the runs, then score them.** Your labels first (the cell stops until every case has one), then the
+check on all seven, case by case, with a write that never paused failed.
 **Part E: Ask a model judge whether each reply is grounded.** A rubric, a structured verdict, the tool results as
 evidence, one judge call per case beside your label.
 **Part F: Note tokens and time per case.** One row per case: check, judge, label, model calls, tokens, seconds.
@@ -54,10 +55,10 @@ this loop.
 | Part B | `check(lookup, messages)` returns `[]`; the double-charge reply cites `[policy_refunds.md]` and passes `check_reply`; the full check lists a lookup nobody asked for (most runs) |
 | Part C | seven traces; *not approved* paused on `file_refund_request` with invoice 9002 and 9.99; no new row in the table |
 | Part D | seven labels and seven check results; ours agree on all seven: *answerable*, *not in docs*, *missing argument* (a refund proposed on invoice 404) and *out of scope* fail |
-| Part E | *not in docs* fails with the invented price-matching rule listed; seven verdicts beside your labels (ours match five; the judge passes the wrong lookup and the poem, which it cannot see) |
-| Part F | one row per case with model calls, tokens and seconds (ours: the poem cheapest at one call and 929 tokens, *missing argument* dearest at five calls and 7,111 tokens) |
+| Part E | *not in docs* fails with the invented price-matching rule listed; seven verdicts beside your labels (ours match five, two of them for a wrong reason; the judge fails *not approved* over a claim the rejection supports and passes the poem, which it cannot see) |
+| Part F | one row per case with model calls, tokens and seconds (ours: the poem cheapest at one call and 918 tokens, *missing argument* dearest at five calls and 6,877 tokens) |
 
-The saved outputs come from `gpt-4o-mini` on 12 Oct 2026 (Python 3.13.5, macOS, a fresh `uv sync`). Model runs vary,
+The saved outputs come from `gpt-4o-mini` on 13 Oct 2026 (Python 3.13.5, macOS, a fresh `uv sync`). Model runs vary,
 and differ again if `models.env` names another model: compare which case failed and why, not our counts.
 
 ## Before you start

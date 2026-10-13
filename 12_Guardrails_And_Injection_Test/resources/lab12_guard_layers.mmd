@@ -2,28 +2,28 @@
 %% Lab 12: where each guard sits in one turn of the copilot.
 %% Export: npx -y @mermaid-js/mermaid-cli -i lab12_guard_layers.mmd -o lab12_guard_layers.png -b white -s 2
 flowchart TB
-    rep["rep's message<br/>request + pasted ticket"]
-    subgraph app["your app, in plain code"]
-        flag["flag instruction-like lines (B)<br/>wrap pasted text in &lt;ticket&gt; tags (B)"]
-        check["check the reply in code (B)<br/>planted string · phone digits"]
-        safe["safe message if the run fails (E)"]
-    end
+    rep["rep's message"]
     subgraph agent["the agent's middleware"]
-        mod["moderation on input and reply (C)"]
-        model["chat model<br/>retry, then fallback model (E)"]
-        approve["approval before file_refund_request (F)"]
+        mod["moderation on the message,<br/>the tool results and the reply (C)"]
+        model["chat model<br/>retry, then the fallback model (E)"]
+        check["check each tool result in code (B)<br/>retry a failing tool (E)"]
+        approve["approval before file_refund_request<br/>(Lab 09)"]
     end
-    subgraph tools["tools and the Ops API"]
-        search["ticket search filtered by rep,<br/>inside the search (D)"]
-        api["API rules: amount ≤ invoice total,<br/>over 100 dollars → needs_manager"]
+    subgraph tools["tools"]
+        search["ticket search, filtered by rep<br/>inside the search (D)"]
+        ops["Ops API tools and the handbook search"]
     end
+    reply["check the reply in code (B)<br/>planted string · phone digits"]
     shown["what the rep sees"]
-    rep --> flag --> mod --> model
-    model --> search --> model
-    model --> approve --> api
-    model --> check --> shown
-    safe --> shown
+    rep --> mod --> model
+    model --> check --> search
+    check --> ops
+    search --> check
+    ops --> check
+    check --> model
+    model --> approve --> ops
+    model --> reply --> shown
     classDef first fill:#C9F24D,stroke:#0B1220,color:#0B1220
     classDef out fill:#0B1220,stroke:#0B1220,color:#FFFFFF
-    class approve first
+    class check first
     class shown out

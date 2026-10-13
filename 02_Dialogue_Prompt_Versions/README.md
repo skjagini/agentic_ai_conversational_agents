@@ -39,7 +39,8 @@ instructions and context (`v1`), run the test and read the failing replies.
 `v2`, diff the versions, compare every row, and run a row that moved ten more times before deciding what moved it.
 **Going further.** Score a rule (under 80 words) on the runs you already have; the 20 policy names in the tool's
 description; a test question that repeats the prompt's example.
-**Challenge.** Fix one more case as `v3`, then test `v1`, `v2` and `v3` on two questions none was written on.
+**Challenge.** Name the step that fails, fix one more case as `v3` from a starter cell, and hand in the diff, both
+tables and one explained move; then test `v1`, `v2` and `v3` on two questions none was written on.
 
 ## Checkpoints
 

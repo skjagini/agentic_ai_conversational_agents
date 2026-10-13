@@ -1,12 +1,11 @@
-# The packages app.py and shared/ import, at the versions the lab tested (11 Oct 2026).
+# The packages app.py and shared/ import, at the versions the lab tested (13 Oct 2026).
 # No gradio line: the Space installs the version in README.md (sdk_version).
 langchain==1.4.3
 langchain-core==1.6.6
 langchain-openai==1.6.7
-langchain-text-splitters==1.1.3
 langgraph==1.2.12
 openai==3.24.0
-faiss-cpu==1.15.1
+# numpy: InMemoryVectorStore (the policy and ticket searches) computes its scores with it
 numpy==2.5.3
 fastapi==0.141.1
 uvicorn==0.54.0

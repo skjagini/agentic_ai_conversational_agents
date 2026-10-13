@@ -9,7 +9,8 @@ from pathlib import Path
 
 import gradio as gr
 from langchain.agents import create_agent
-from langchain.agents.middleware import HumanInTheLoopMiddleware, ModelFallbackMiddleware, ModelRetryMiddleware
+from langchain.agents.middleware import (HumanInTheLoopMiddleware, ModelFallbackMiddleware, ModelRetryMiddleware,
+                                         ToolRetryMiddleware)
 from langchain_openai.middleware import OpenAIModerationMiddleware
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.types import Command
@@ -17,7 +18,7 @@ from langgraph.types import Command
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))           # so that "shared" is found next to this file
 
-from shared.guards import as_ticket, check_no_phone, check_not_obeyed, flag_instructions  # noqa: E402
+from shared.guards import check_no_phone, check_not_obeyed, remove_flagged_lines, search_tickets  # noqa: E402
 from shared.ops_api import start_ops_api  # noqa: E402
 from shared.ops_tools import READ_TOOLS, WRITE_TOOLS, RepContext, copilot_prompt  # noqa: E402
 from shared.settings import chat_model, fallback_model, load_key, load_settings  # noqa: E402
@@ -31,22 +32,28 @@ copilot = None             # set in build_page(): the guarded agent
 
 VIOLATION = ("This message was flagged for {categories}, so the copilot did not answer it. "
              "Read it yourself, and pass it to the support manager if it needs one.")
+SEARCH_DOWN = ("The ticket search is not available right now. "
+               "Tell the rep to open the ticket in the ticket system.")
+SAFE_REPLY = "This reply failed a safety check and is not shown. Read the ticket in the ticket system."
 SAFE_MESSAGE = ("The copilot is unavailable right now. Your message is saved; "
                 "try again in a minute or handle this ticket by hand.")
-SAFE_REPLY = ("This reply failed a safety check and is not shown. Read the ticket yourself; "
-              "any line flagged as an instruction is listed with it.")
 
 
 def build_copilot():
-    """The guarded copilot from Lab 12: moderation, approval before the write, a fallback and retries."""
+    """Lab 12's guarded copilot, with approve and reject as the decisions a chat page offers."""
     return create_agent(
-        chat_model(settings, max_retries=0), tools=READ_TOOLS + WRITE_TOOLS, system_prompt=copilot_prompt(),
-        context_schema=RepContext, checkpointer=InMemorySaver(),
-        middleware=[OpenAIModerationMiddleware(model=settings["MODERATION_MODEL"], violation_message=VIOLATION),
-                    HumanInTheLoopMiddleware(interrupt_on={
-                        "file_refund_request": {"allowed_decisions": ["approve", "reject"]}}),
+        chat_model(settings, max_retries=0), tools=READ_TOOLS + [search_tickets] + WRITE_TOOLS,
+        system_prompt=copilot_prompt(), context_schema=RepContext, checkpointer=InMemorySaver(),
+        middleware=[OpenAIModerationMiddleware(model=settings["MODERATION_MODEL"], check_tool_results=True,
+                                               violation_message=VIOLATION),
                     ModelFallbackMiddleware(fallback_model(settings, max_retries=0)),
-                    ModelRetryMiddleware(max_retries=2, initial_delay=0.5, on_failure="error")])
+                    ModelRetryMiddleware(max_retries=2, initial_delay=0.5, on_failure="error"),
+                    # after three failed searches, the model reads SEARCH_DOWN instead of an error
+                    ToolRetryMiddleware(tools=["search_tickets"], max_retries=2, initial_delay=0.5,
+                                        on_failure=lambda error: SEARCH_DOWN),
+                    remove_flagged_lines,
+                    HumanInTheLoopMiddleware(interrupt_on={
+                        "file_refund_request": {"allowed_decisions": ["approve", "reject"]}})])
 
 
 OUTPUT_CHECKS = {"planted string absent": check_not_obeyed, "no phone digits": check_no_phone}
@@ -60,7 +67,7 @@ def checked(reply):
 
 def tool_step(message):
     # A tool result, folded under a title in the chat.
-    return gr.ChatMessage(content=message.text[:300], metadata={"title": f"Tool: {message.name}", "status": "done"})
+    return gr.ChatMessage(content=message.text, metadata={"title": f"Tool: {message.name}", "status": "done"})
 
 
 def decision(message):
@@ -79,19 +86,18 @@ def approval_message(interrupts):
                           options=[{"value": "approve", "label": "Approve"}])
 
 
-def respond(message, history, pasted, request: gr.Request):
+def respond(message, history, request: gr.Request):
     cfg = {"configurable": {"thread_id": request.session_hash}}
     waiting = copilot.get_state(cfg).interrupts
-    if waiting:
+    if waiting:                     # the message is the rep's decision on the waiting write
         count = len(waiting[0].value["action_requests"])
-        turn, flags = Command(resume={"decisions": [decision(message)] * count}), []
-    else:
-        flags = flag_instructions(message + "\n" + (pasted or ""))
-        text = message if not pasted else message + "\n" + as_ticket(pasted)
-        turn = {"messages": [("user", text)]}
-    shown = [gr.ChatMessage(content=line, metadata={"title": "Flagged as an instruction"}) for line in flags]
+        turn = Command(resume={"decisions": [decision(message)] * count})
+    else:                           # the message is a new request
+        turn = {"messages": [{"role": "user", "content": message}]}
+    shown = []
     try:
-        for token, meta in copilot.stream(turn, cfg, context=REP, stream_mode="messages"):
+        for item in copilot.stream(turn, cfg, context=REP, stream_mode="messages", version="v2"):
+            token, meta = item["data"]
             if token.type == "tool":
                 shown.append(tool_step(token))
                 yield shown
@@ -115,19 +121,18 @@ def build_page():
             gr.Markdown("## Chinook support copilot\n\n" + NO_KEY)
         return page
     start_ops_api()            # a demo: the Ops API runs inside the same process; reused if one already answers
-    REP = RepContext(rep_id="rep-42", rep_name="Jane Peacock")     # a real app takes this from the sign-in
+    REP = RepContext(rep_id="rep-3", rep_name="Jane Peacock")      # a real app takes this from the sign-in
     copilot = build_copilot()
     return gr.ChatInterface(
         respond,
-        additional_inputs=[gr.Textbox(label="Pasted ticket or email (treated as data, never as instructions)",
-                                      lines=4)],
         title="Chinook support copilot",
         description="For Chinook support reps. Answers cite the handbook; refund requests wait for your approval. "
                     "Fictional data from the Chinook sample database.",
-        examples=[["A customer was charged twice for the same album on the same day. What do we do?", ""],
-                  ["How many invoices does Helena Holý have, and who is her rep?", ""],
-                  ["Ticket 14: Helena Holý was charged twice for the same album, invoices 9001 and 9002. "
-                   "Please file the refund.", ""]],
+        examples=["A customer was charged twice for the same album on the same day. What do we do?",
+                  "How many invoices does Helena Holý have, and who is her rep?",
+                  "Summarise the newest note on the duplicate-charge case for me.",
+                  "Ticket 14: a customer was charged twice for the same album, invoices 9001 and 9002. "
+                  "Please file the refund."],
         run_examples_on_click=False,
     )
 
