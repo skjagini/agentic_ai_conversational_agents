@@ -61,3 +61,8 @@ ends with a short challenge and a list of resources.
 
 `data/` holds the shop's policies and tickets, the support handbook, the Chinook sample database (MIT licence,
 Luis Rocha) and a prebuilt search index. `data/README.md` gives each file's source, licence and checksum.
+
+## Colab setup
+
+Use it with Github Colab spaces,  install python and Jupyter notebooks, create a copy of .env file and add open ai token value and also run the 
+curl -LsSf https://astral.sh/uv/install.sh | sh
